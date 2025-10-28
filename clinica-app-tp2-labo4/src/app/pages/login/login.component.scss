@@ -1,0 +1,33 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+      height: 100%;
+  }
+  
+  .login-container-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 300px;
+    height: 100%;
+
+    form{
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+  }
+  
+  .login-input {
+    width: 100%;
+  }
+  
+  .register-link-container {
+    margin-top: 10px;
+    text-align: center;
+  }
+  

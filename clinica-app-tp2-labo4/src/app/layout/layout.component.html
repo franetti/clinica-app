@@ -1,0 +1,53 @@
+<mat-sidenav-container class="layout-container">
+
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+    <mat-toolbar color="primary">Menú</mat-toolbar>
+      <mat-nav-list>
+          <ng-container *ngIf="userSession?.tipoUsuario === 'admin'; " >  
+                    <a mat-list-item routerLink="/usuarios">Usuarios</a>
+          </ng-container>
+          <!-- <a mat-list-item routerLink="/login">Login</a>
+          <a mat-list-item routerLink="/registro">Registro</a> -->
+          <a mat-list-item routerLink="/turnos">Turnos</a>
+          <a mat-list-item  (click)="logout()">Cerrar sesión</a>
+      </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+      <mat-toolbar color="primary" class="header mat-elevation-z4">
+    <button mat-icon-button (click)="sidenav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    
+    <span class="titulo">Clínica Online</span>
+    <span class="spacer"></span>
+
+    <ng-container *ngIf="userSession; " >    
+      <div style="gap:10px;display: flex;">
+        <span>{{ userSession.nombre }} {{ userSession.apellido }}</span>
+
+      </div>
+    </ng-container>
+  </mat-toolbar>
+
+    <main class="contenido">
+      <ng-content></ng-content>
+    </main>
+
+<!-- 
+        <mat-toolbar color="primary" class="footer">
+      <span>© 2025 Mi Empresa</span>
+    </mat-toolbar> -->
+  </mat-sidenav-content>
+
+
+
+
+</mat-sidenav-container>
+
+
+
+
+
+
+

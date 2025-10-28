@@ -1,0 +1,28 @@
+<div class="login-container">
+    <div class="login-container-body">
+      <h3>Inicio de sesion</h3>
+  
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+            <mat-form-field appearance="fill" class="login-input">
+            <mat-label>Usuario</mat-label>
+            <input matInput formControlName="username" type="text" />
+            </mat-form-field>
+    
+            <mat-form-field appearance="fill" class="login-input">
+            <mat-label>Contraseña</mat-label>
+            <input matInput formControlName="password" type="password" />
+            </mat-form-field>
+    
+            <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">
+                Ingresar
+            </button>
+        </form>
+        <div class="register-link-container">
+            ¿No tenes una cuenta?<a routerLink="../register" class="register-link"> Registrate</a>
+        </div>
+    
+        <div >
+            <a mat-raised-button color="secondary"  class="register-link" (click)="accesoRapido()">Acceso Rápido</a>
+        </div>
+    </div>
+</div>

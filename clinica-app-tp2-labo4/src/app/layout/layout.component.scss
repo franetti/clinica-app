@@ -1,0 +1,52 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  font-size: 14px;
+  justify-content: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.contenido {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.layout-container {
+  height: 100vh;
+}
+
+// .layout-container {
+//   height: 100vh;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+mat-sidenav {
+  width: 250px;
+  background: #fafafa;
+}
+
+mat-sidenav-content {
+  background: #f5f5f5;
+}
+
+// .page-container {
+//   padding: 16px;
+// }
+
