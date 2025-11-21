@@ -1,23 +1,30 @@
 <mat-sidenav-container class="layout-container">
 
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
-    <mat-toolbar color="primary">Menú</mat-toolbar>
-      <mat-nav-list>
-          <ng-container *ngIf="userSession?.tipoUsuario === 'admin'; " >  
-                    <a mat-list-item routerLink="/usuarios">Usuarios</a>
-          </ng-container>
-          <!-- <a mat-list-item routerLink="/login">Login</a>
-          <a mat-list-item routerLink="/registro">Registro</a> -->
-          <a mat-list-item routerLink="/turnos">Turnos</a>
-          <a mat-list-item  (click)="logout()">Cerrar sesión</a>
-      </mat-nav-list>
-  </mat-sidenav>
 
+    <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+      <mat-toolbar color="primary">Menú</mat-toolbar>
+        <mat-nav-list>
+            <ng-container *ngIf="userSession?.tipoUsuario === 'admin'; " >  
+                      <a mat-list-item routerLink="/usuarios">Usuarios</a>
+            </ng-container>
+            <!-- <a mat-list-item routerLink="/login">Login</a>
+            <a mat-list-item routerLink="/registro">Registro</a> -->
+            <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'admin'">
+              <a mat-list-item routerLink="/solicitar-turno">Solicitar Turno</a>
+            </ng-container>
+            <a mat-list-item routerLink="/mis-turnos">Mis Turnos</a>
+            <a mat-list-item  (click)="logout()">Cerrar sesión</a>
+        </mat-nav-list>
+    </mat-sidenav>
+  
   <mat-sidenav-content>
-      <mat-toolbar color="primary" class="header mat-elevation-z4">
-    <button mat-icon-button (click)="sidenav.toggle()">
-      <mat-icon>menu</mat-icon>
-    </button>
+    <mat-toolbar color="primary" class="header mat-elevation-z4">
+    @if (userSession) 
+    {
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
     
     <span class="titulo">Clínica Online</span>
     <span class="spacer"></span>

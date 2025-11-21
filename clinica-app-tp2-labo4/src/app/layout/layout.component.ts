@@ -28,9 +28,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userSub = this.authService.getUser().subscribe(user => {
+      debugger
       this.userSession = user;
       //console.log('User Session:', this.userSession);
     });
+    debugger
   }
 
   ngOnDestroy(): void {

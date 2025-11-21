@@ -1,4 +1,3 @@
-// usuarios.page.ts
 import { Component, OnInit } from '@angular/core';
 import { UsuariosService } from '../../services/usuarios.service';
 import { UsuarioDTO } from '../../models/usuario';
@@ -38,9 +37,12 @@ export class UsuariosPage implements OnInit {
   }
 
   toggleHabilitado(usuario: UsuarioDTO) {
-      this.usuariosService.toggleHabilitado(usuario).subscribe(updated => {
-        if(updated != null)
-            usuario.habilitado = updated.habilitado;
+    this.usuariosService.toggleHabilitado(usuario).subscribe(updated => {
+      if (updated != null) {
+          usuario.habilitado = updated.habilitado;
+        }
+        this.loadPacientes();
+        this.loadEspecialistas();
     });
   }
 }

@@ -184,14 +184,14 @@ export class AuthService {
         if (datos.imagen) {
             const urlImg = await this.saveFile(datos.imagen);
             if (urlImg) {
-                img1 = urlImg.path;
+                img1 = urlImg;
             }
         }
     
         if (datos.imagen2) {
             const urlImg2 = await this.saveFile(datos.imagen2);
             if (urlImg2) {
-                img2 = urlImg2.path;
+                img2 = urlImg2;
             }
         }
 
@@ -221,8 +221,9 @@ export class AuthService {
         });            
     }
       
-    async saveFile(img: File | null | undefined) {
+    async saveFile(img: File | string | null | undefined) {
         if (!img) return null;
+        img = img as File;
         const ahora = new Date();
         const fechaConMilis = ahora.toISOString();
         const filename = `${fechaConMilis}-${img.name}`;
@@ -235,6 +236,17 @@ export class AuthService {
                 upsert: false
             });
         if (error) console.error('Error subiendo imagen:', error.message);
-        return data;
+
+            // Obtener public link
+        const { data: publicData } = this.supabaseService.getClient()
+            .storage
+            .from('imagenes')
+            .getPublicUrl(`users/${filename}`);
+        
+        
+                // El enlace público está acá
+        const publicUrl = publicData.publicUrl;
+
+        return publicUrl;
     }
 }

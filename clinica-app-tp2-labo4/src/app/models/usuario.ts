@@ -7,8 +7,8 @@ export type UsuarioDTO = {
   email: string;
   password: string;
   tipoUsuario: 'paciente' | 'especialista' | 'admin';
-  imagen: File;
-  imagen2?: File;
+  imagen: File | string;
+  imagen2?: File | string;
   obraSocial?: string;  
   especialidad?: string;  
   habilitado?: boolean;

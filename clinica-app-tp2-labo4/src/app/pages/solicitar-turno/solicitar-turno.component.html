@@ -1,0 +1,185 @@
+<div class="solicitar-turno-container">
+  <h2>Solicitar Turno</h2>
+
+  <form [formGroup]="turnoForm" (ngSubmit)="onSubmit()" class="formulario">
+    
+    <!-- Selector de Paciente (solo para admin) -->
+    <mat-form-field appearance="fill" *ngIf="esAdmin">
+      <mat-label>Paciente</mat-label>
+      <mat-select formControlName="paciente">
+        <mat-option *ngFor="let paciente of pacientes" [value]="paciente.id">
+          {{ paciente.nombre }} {{ paciente.apellido }} - DNI: {{ paciente.dni }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Selector de Especialidad con Autocomplete -->
+    <mat-form-field appearance="fill">
+      <mat-label>Especialidad</mat-label>
+      <input 
+        type="text"
+        matInput 
+        formControlName="especialidad"        
+        placeholder="Escriba para buscar...">
+      <!-- <mat-autocomplete #autoEspecialidad="matAutocomplete">
+        <mat-option *ngFor="let especialidad of especialidadesFiltradas | async" [value]="especialidad">
+          {{ especialidad }}
+        </mat-option>
+      </mat-autocomplete> -->
+    </mat-form-field>
+
+
+    <div class="botones-visuales-container">
+      <div class="botones-grid">
+            <!-- Botones visuales de especialidades -->
+      @if(turnoForm.get('especialidad')?.value) 
+      {
+            <div 
+              *ngFor="let especialidad of especialidadesFiltradas | async"        
+              class="boton-circular"
+              [class.seleccionado]="turnoForm.get('especialidad')?.value === especialidad"
+              (click)="seleccionarEspecialidad(especialidad)">
+              <div class="imagen-circular">
+                <img [src]="getImagenEspecialidad(especialidad)" alt="{{ especialidad }}">
+              </div>
+              <span class="nombre-item">{{ especialidad }}</span>
+            </div>
+          }       
+      @else{
+          <div 
+              *ngFor="let especialidad of especialidadesVisibles"        
+              class="boton-circular"
+              [class.seleccionado]="turnoForm.get('especialidad')?.value === especialidad"
+              (click)="seleccionarEspecialidad(especialidad)">
+              <div class="imagen-circular">
+                <img [src]="getImagenEspecialidad(especialidad)" alt="{{ especialidad }}">
+              </div>
+              <span class="nombre-item">{{ especialidad }}</span>
+            </div>
+       }
+      </div>
+    </div>
+     
+
+    <!-- Selector de Especialista -->
+    <mat-form-field appearance="fill">
+      <mat-label>Especialista</mat-label>
+      <input 
+        type="text"
+        matInput
+        formControlName="especialistaBusqueda"
+        [disabled]="!turnoForm.get('especialidad')?.value"
+        placeholder="Escriba para buscar...">
+    </mat-form-field>
+
+    <!-- Botones visuales de especialistas -->
+    <div class="botones-visuales-container">
+      <div class="botones-grid">
+       @if(especialistasFiltrados) 
+      {        
+        <div 
+          *ngFor="let especialista of especialistasFiltrados" 
+          class="boton-circular"
+          [class.seleccionado]="turnoForm.get('especialista')!.value === especialista.id"
+          (click)="seleccionarEspecialista(especialista)">
+          <div class="imagen-circular">
+            <img [src]="getImagenEspecialista(especialista)" alt="{{ especialista.nombre }}">
+          </div>
+          <span class="nombre-item">Dr./Dra. {{ especialista.apellido }}</span>
+        </div>   
+      }
+      @else{
+         <div 
+          *ngFor="let especialista of especialistasVisibles" 
+          class="boton-circular"
+          [class.seleccionado]="turnoForm.get('especialista')?.value === especialista.id"
+          (click)="seleccionarEspecialista(especialista)">
+          <div class="imagen-circular">
+            <img [src]="getImagenEspecialista(especialista)" alt="{{ especialista.nombre }}">
+          </div>
+          <span class="nombre-item">Dr./Dra. {{ especialista.apellido }}</span>
+        </div>  
+      }
+      </div>
+    </div>
+
+    @if(cargandoDias){
+      <div class="loading-container" style="margin-top: 20px;">  
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+    @else{
+      @if (turnoForm.get('especialista')?.value && diasDisponibles.length > 0) 
+        {
+        
+        <!-- Selector de Fecha -->
+        <div class="seccion-fecha">
+          <label class="label-seccion">Seleccione un día:</label>
+          <div class="dias-container">
+            <mat-chip-listbox formControlName="fecha">
+              <mat-chip-option style="border-radius: 0 !important;"
+                *ngFor="let dia of diasDisponibles" 
+                [value]="dia.fecha"
+                color="primary">
+                {{ dia.label }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+        </div>
+      }
+      @else{
+        <div class="seccion-fecha" *ngIf="turnoForm.get('especialista')?.value" style="display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;">
+          <p>No hay días disponibles para el especialista seleccionado.</p>
+        </div>
+      }
+    }
+
+    <!-- Selector de Horario -->
+    <div class="seccion-horario" *ngIf="horariosDisponibles.length > 0">
+      <label class="label-seccion">Seleccione un horario:</label>
+      
+      <div *ngIf="cargandoHorarios" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      @if(cargandoHorarios){
+        <div class="loading-container">  
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
+      @else {
+        @if ( turnoForm.get('especialista')?.value) 
+        {
+          <div class="horarios-grid" *ngIf="horariosDisponibles.length > 0">
+            <mat-chip-listbox formControlName="horario">
+            <mat-chip-option  style="border-radius: 0 !important;"
+                *ngFor="let horario of horariosDisponibles" 
+                [value]="horario.hora"
+                [disabled]="!horario.disponible"
+                [color]="horario.disponible ? 'primary' : 'warn'">
+                {{ horario.hora }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+
+          <div class="horarios-grid" *ngIf="horariosDisponibles.length == 0">
+            <p>No hay horarios disponibles para la fecha seleccionada.</p>
+          </div>
+        }
+      }    
+    </div>
+
+    <!-- Botón de envío -->
+    <div class="acciones">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="turnoForm.invalid || cargando">
+        <span *ngIf="!cargando">Solicitar Turno</span>
+        <span *ngIf="cargando">Procesando...</span>
+      </button>
+    </div>
+  </form>
+</div>
+

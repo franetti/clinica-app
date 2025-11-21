@@ -1,0 +1,32 @@
+<div *ngIf="cargando">Cargando...</div>
+
+<mat-list *ngIf="!cargando">
+
+  <mat-list-item *ngFor="let t of turnos">
+
+    <div class="flex-col w-full">
+      <div>{{t.paciente}}</div>
+      <div>{{t.fecha | date:'dd/MM/yyyy HH:mm'}}</div>
+
+      <mat-chip [color]="t.estadoTurno=='realizado' ? 'primary' : 'accent'" selected>
+        {{ t.estadoTurno | uppercase }}
+      </mat-chip>
+
+      <div class="pt-2 flex gap-2">
+
+        <button *ngIf="t.estadoTurno=='pendiente'" mat-raised-button color="primary" (click)="aceptar(t)">Aceptar</button>
+
+        <button *ngIf="t.estadoTurno=='aceptado'" mat-raised-button color="primary" (click)="finalizar(t)">Finalizar</button>
+
+        <button *ngIf="t.estadoTurno=='pendiente'" mat-raised-button color="warn" (click)="cancelar(t)">Cancelar</button>
+
+        <button *ngIf="t.estadoTurno=='pendiente'" mat-stroked-button color="warn" (click)="rechazar(t)">Rechazar</button>
+
+        <button *ngIf="t.comentario" mat-stroked-button (click)="verResenna(t)">Ver Reseña</button>
+
+      </div>
+    </div>
+
+  </mat-list-item>
+
+</mat-list>
