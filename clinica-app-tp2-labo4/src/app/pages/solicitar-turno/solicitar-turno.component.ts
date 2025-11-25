@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { UsuariosService } from '../../services/usuarios.service';
 import { TurnosService, TurnoDTO } from '../../services/turnos.service';
+import { HorariosService, HorarioDTO } from '../../services/horarios.service';
 import { UsuarioDTO } from '../../models/usuario';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -74,6 +75,7 @@ export class SolicitarTurnoComponent implements OnInit {
     private authService: AuthService,
     private usuariosService: UsuariosService,
     private turnosService: TurnosService,
+    private horariosService: HorariosService,
     private snackBar: MatSnackBar,
     private router: Router
   ) {}
@@ -232,44 +234,53 @@ export class SolicitarTurnoComponent implements OnInit {
 
   async cargarDiasDisponibles(especialistaId: string) {
     this.diasDisponibles = [];
-    debugger
+    
     try {
-      // Obtener turnos habilitados del especialista
-      const turnosHabilitados = await this.turnosService.obtenerTurnosHabilitadosEspecialista(especialistaId);
+      const especialidadSeleccionada = this.turnoForm.get('especialidad')?.value;
+      if (!especialidadSeleccionada) return;
+
+      // Obtener horarios configurados del especialista para la especialidad seleccionada
+      const horarios = await this.horariosService.obtenerHorariosPorEspecialidad(especialistaId, especialidadSeleccionada);
       
-      // Filtrar turnos dentro de los próximos 15 días y sin paciente asignado
+      if (horarios.length === 0) {
+        this.snackBar.open('El especialista no tiene horarios configurados para esta especialidad', 'Cerrar', { duration: 3000 });
+        return;
+      }
+
+      // Obtener los días de trabajo del primer horario (debería haber solo uno por especialidad)
+      const horario = horarios[0];
+      const diasTrabajo = horario.dias.split(',').map(d => parseInt(d.trim())); // [1,2,3,4,5] = Lunes a Viernes
+      
+      // Generar días disponibles en los próximos 15 días que coincidan con los días de trabajo
       const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
       const limite = new Date();
       limite.setDate(hoy.getDate() + 15);
       
-      const turnosFiltrados = turnosHabilitados.filter(turno => {
-        debugger
-        const fechaTurno = new Date(turno.fecha);
-        // Solo incluir turnos futuros, dentro de 15 días y sin paciente asignado (o paciente vacío)
-        return fechaTurno > hoy && 
-               fechaTurno <= limite && 
-               (!turno.paciente || turno.paciente === '');
-      });
+      const fechasDisponibles: Date[] = [];
+      const fechaActual = new Date(hoy);
+      fechaActual.setDate(fechaActual.getDate() + 1); // Empezar desde mañana
       
-      // Extraer fechas únicas y crear los días disponibles
-      const fechasUnicas = new Map<string, Date>();
-      
-      turnosFiltrados.forEach(turno => {
-        const fechaTurno = new Date(turno.fecha);
-        const fechaKey = this.formatearFechaISO(fechaTurno);
+      while (fechaActual <= limite) {
+        // getDay() devuelve 0=Domingo, 1=Lunes, ..., 6=Sábado
+        // Convertir a nuestro formato: 1=Lunes, 2=Martes, etc.
+        const diaSemana = fechaActual.getDay();
+        const diaNumero = diaSemana === 0 ? 7 : diaSemana; // Convertir domingo de 0 a 7
         
-        if (!fechasUnicas.has(fechaKey)) {
-          fechasUnicas.set(fechaKey, fechaTurno);
+        // Verificar si este día está en los días de trabajo
+        if (diasTrabajo.includes(diaNumero)) {
+          fechasDisponibles.push(new Date(fechaActual));
         }
-      });
+        
+        // Avanzar al siguiente día
+        fechaActual.setDate(fechaActual.getDate() + 1);
+      }
       
-      // Convertir a array y ordenar
-      this.diasDisponibles = Array.from(fechasUnicas.values())
-        .sort((a, b) => a.getTime() - b.getTime())
-        .map(fecha => ({
-          fecha: fecha,
-          label: `${fecha.getDate()} / ${fecha.getMonth() +1 }`
-        }));
+      // Convertir a formato para el selector
+      this.diasDisponibles = fechasDisponibles.map(fecha => ({
+        fecha: fecha,
+        label: `${fecha.getDate()} / ${fecha.getMonth() + 1}`
+      }));
         
     } catch (error) {
       console.error('Error al cargar días disponibles:', error);
@@ -295,38 +306,73 @@ export class SolicitarTurnoComponent implements OnInit {
     this.horariosDisponibles = [];
     
     try {
-      // Obtener turnos habilitados del especialista
-      const turnosHabilitados = await this.turnosService.obtenerTurnosHabilitadosEspecialista(especialistaId);
+      const especialidadSeleccionada = this.turnoForm.get('especialidad')?.value;
+      if (!especialidadSeleccionada) return;
+
+      // Obtener horarios configurados del especialista para esta especialidad
+      const horarios = await this.horariosService.obtenerHorariosPorEspecialidad(especialistaId, especialidadSeleccionada);
       
-      // Filtrar turnos del día seleccionado
-      const turnosDelDia = turnosHabilitados.filter(turno => {
+      if (horarios.length === 0) {
+        this.snackBar.open('El especialista no tiene horarios configurados', 'Cerrar', { duration: 3000 });
+        return;
+      }
+
+      // Obtener el rango de horarios del primer horario (debería haber solo uno por especialidad)
+      const horario = horarios[0];
+      const [horaInicio, horaFin] = horario.horario.split('-').map(h => parseInt(h.trim()));
+
+      // Generar todos los horarios posibles en el rango configurado cada 30 minutos
+      const horariosGenerados: HorarioDisponible[] = [];
+      
+      for (let hora = horaInicio; hora < horaFin; hora++) {
+        for (let minuto of [0, 30]) {
+          const fechaHorario = new Date(fecha);
+          fechaHorario.setHours(hora, minuto, 0, 0);
+          
+          const hours = hora;
+          const minutes = minuto;
+          const sufijo = hours >= 12 ? 'PM' : 'AM';
+          const horas12 = hours % 12 === 0 ? 12 : hours % 12;
+          const horaFormateada = `${horas12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${sufijo}`;
+          
+          horariosGenerados.push({
+            fecha: this.formatearFechaISO(fechaHorario),
+            hora: horaFormateada,
+            disponible: true,
+            turnoId: undefined
+          });
+        }
+      }
+
+      // Obtener turnos existentes para este especialista y fecha
+      const turnosExistentes = await this.turnosService.obtenerTurnosHabilitadosEspecialista(especialistaId);
+      
+      // Filtrar turnos del día seleccionado y especialidad
+      const turnosDelDia = turnosExistentes.filter(turno => {
         const fechaTurno = new Date(turno.fecha);
-        return this.mismoDia(fechaTurno, fecha);
+        return this.mismoDia(fechaTurno, fecha) && turno.especialidad === especialidadSeleccionada;
       });
       
-      // Crear horarios disponibles basados en los turnos de la BD
-      this.horariosDisponibles = turnosDelDia.map(turno => {
-        const fechaTurno = new Date(turno.fecha);
-       const hours = fechaTurno.getHours();
-        const minutes = fechaTurno.getMinutes();
-
-        const sufijo = hours >= 12 ? 'PM' : 'AM';
-        const horas12 = hours % 12 === 0 ? 12 : hours % 12;
-
-        const hora = `${horas12.toString().padStart(2, '0')}:${minutes
-          .toString()
-          .padStart(2, '0')} ${sufijo}`;
+      // Marcar horarios ocupados
+      horariosGenerados.forEach(horario => {
+        const turnoOcupado = turnosDelDia.find(turno => {
+          const fechaTurno = new Date(turno.fecha);
+          const hours = fechaTurno.getHours();
+          const minutes = fechaTurno.getMinutes();
+          const sufijo = hours >= 12 ? 'PM' : 'AM';
+          const horas12 = hours % 12 === 0 ? 12 : hours % 12;
+          const horaTurno = `${horas12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${sufijo}`;
+          
+          return horaTurno === horario.hora && turno.paciente && turno.paciente !== '';
+        });
         
-        // Disponible si no tiene paciente asignado (o paciente vacío)
-        const disponible = !turno.paciente || turno.paciente === '';
-        
-        return {
-          fecha: this.formatearFechaISO(fechaTurno),
-          hora: hora,
-          disponible: disponible,
-          turnoId: turno.id
-        };
-      }).sort((a, b) => a.hora.localeCompare(b.hora));
+        if (turnoOcupado) {
+          horario.disponible = false;
+          horario.turnoId = turnoOcupado.id;
+        }
+      });
+      
+      this.horariosDisponibles = horariosGenerados;
       
     } catch (error) {
       console.error('Error al cargar horarios disponibles:', error);
@@ -345,7 +391,6 @@ export class SolicitarTurnoComponent implements OnInit {
   }
 
   async onSubmit() {
-    debugger
     if (this.turnoForm.invalid) {
       this.snackBar.open('Por favor complete todos los campos', 'Cerrar', { duration: 3000 });
       return;
@@ -354,7 +399,6 @@ export class SolicitarTurnoComponent implements OnInit {
     this.cargando = true;
 
     try {
-      debugger
       const formValue = this.turnoForm.value;
 
       // Determinar el paciente
@@ -365,18 +409,52 @@ export class SolicitarTurnoComponent implements OnInit {
         pacienteId = this.userSession?.id || '';
       }
 
-      // Buscar el turno seleccionado en horariosDisponibles
+      // Buscar el horario seleccionado
       const horarioSeleccionado = this.horariosDisponibles.find(h => h.hora === formValue.horario);
       
-      if (!horarioSeleccionado || !horarioSeleccionado.turnoId) {
-        throw new Error('No se encontró el turno seleccionado');
+      if (!horarioSeleccionado || !horarioSeleccionado.disponible) {
+        throw new Error('El horario seleccionado no está disponible');
       }
 
-      // Actualizar el turno existente asignándole el paciente
-      await this.turnosService.actualizarTurno(horarioSeleccionado.turnoId, {
-        paciente: pacienteId,
-        estadoTurno: 'pendiente'
-      });
+      // Obtener la fecha y hora seleccionadas
+      const fechaSeleccionada = this.turnoForm.get('fecha')?.value;
+      const horaSeleccionada = formValue.horario;
+      
+      // Parsear la hora (formato "09:00 AM" o "03:30 PM")
+      const [horaStr, sufijo] = horaSeleccionada.split(' ');
+      const [horas12, minutos] = horaStr.split(':').map((n: string) => parseInt(n));
+      let horas24 = horas12;
+      
+      if (sufijo === 'PM' && horas12 !== 12) {
+        horas24 = horas12 + 12;
+      } else if (sufijo === 'AM' && horas12 === 12) {
+        horas24 = 0;
+      }
+      
+      // Crear la fecha completa del turno
+      const fechaTurno = new Date(fechaSeleccionada);
+      fechaTurno.setHours(horas24, minutos, 0, 0);
+
+      // Si ya existe un turno en esta fecha/hora, actualizarlo; sino, crear uno nuevo
+      if (horarioSeleccionado.turnoId) {
+        // Actualizar turno existente
+        await this.turnosService.actualizarTurno(horarioSeleccionado.turnoId, {
+          paciente: pacienteId,
+          estadoTurno: 'pendiente'
+        });
+      } else {
+        // Crear nuevo turno
+        const nuevoTurno: Partial<TurnoDTO> = {
+          fecha: fechaTurno.toISOString(),
+          especialista: formValue.especialista,
+          especialidad: formValue.especialidad,
+          paciente: pacienteId,
+          estadoTurno: 'pendiente',
+          habilitado: true
+        };
+        
+        await this.turnosService.crearTurno(nuevoTurno);
+      }
 
       this.snackBar.open('Turno solicitado con éxito', 'Cerrar', { duration: 3000 });
       this.turnoForm.reset();

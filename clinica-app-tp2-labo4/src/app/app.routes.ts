@@ -20,6 +20,11 @@ export const routes: Routes = [
                 //meter guard de admin
             },
             {
+                path: 'turnos',
+                loadComponent: () => import('./pages/turnos-admin/turnos-admin.component').then(m => m.TurnosAdminComponent),
+                //meter guard de admin
+            },
+            {
                 path: 'login',
                 loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
                  canDeactivate: [] //agregar guard para redirigir si ya esta logueado
@@ -35,6 +40,10 @@ export const routes: Routes = [
             {
                 path: 'solicitar-turno',
                 loadComponent: () => import('./pages/solicitar-turno/solicitar-turno.component').then(m => m.SolicitarTurnoComponent),
+            },
+            {
+                path: 'mi-perfil',
+                loadComponent: () => import('./pages/mi-perfil/mi-perfil.component').then(m => m.MiPerfilComponent),
             },
             
             {

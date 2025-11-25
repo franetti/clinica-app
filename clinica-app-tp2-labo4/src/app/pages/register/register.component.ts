@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RecaptchaModule } from 'ng-recaptcha';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioDTO } from '../../models/usuario';
 import { Router, ɵEmptyOutletComponent } from '@angular/router';
@@ -22,8 +24,10 @@ import { SpinnerService } from '../../services/spinner.service';
     MatIconModule,
     MatRadioModule,
     MatSelectModule,
+    MatTooltipModule,
     ReactiveFormsModule,
     FormsModule,
+    RecaptchaModule,
     ɵEmptyOutletComponent
 ],
   templateUrl: './register.component.html',
@@ -36,7 +40,11 @@ export class RegisterComponent
   especialidades: string[] = ["Clinico", "Pediatra", "Traumatologo", "Cardiologo"];//traermelas de un servivio
   nuevaEspecialidad: string = ''; 
   usuarioForm!: FormGroup;    
-  isAdmin:boolean = false; 
+  isAdmin:boolean = false;
+  
+  // reCAPTCHA - Clave de prueba de Google (reemplazar con tu propia clave en producción)
+  siteKey: string = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+  recaptchaToken: string | null = null; 
 
   constructor(private AuthService: AuthService, private snackBar: MatSnackBar, private router: Router,
     private spinnerService: SpinnerService
@@ -54,11 +62,10 @@ export class RegisterComponent
       dni: new FormControl('', [Validators.required, Validators.pattern(/^\d{7,8}$/)]),     
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      imagen: new FormControl(null, Validators.required),      
+      imagen: new FormControl(null, Validators.required),
     });    
     this.tipoUsuario = this.tiposUsuarios[0];
     this.handlerFormControls();
-    //this.getEspecialidades();
 
     this.AuthService.getUser().subscribe(user => {
       if (user && user.tipoUsuario === 'admin') {
@@ -87,12 +94,29 @@ export class RegisterComponent
         return;
       }
 
+      // Validar reCAPTCHA
+      if (!this.recaptchaToken) {
+        this.snackBar.open('Por favor complete el captcha de verificación', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'bottom',
+          panelClass: ['snack-error']
+        });
+        this.spinnerService.hide();
+        return;
+      }
+
       this.usuarioForm.disable();
 
       let datos = this.usuarioForm.value as UsuarioDTO;
 
+      // Agregar el token de reCAPTCHA a los datos (opcional, para validación backend)
+      // Si implementas validación backend, descomenta la siguiente línea:
+      // (datos as any).recaptchaToken = this.recaptchaToken;
+
       await this.AuthService.registrarUsuario(datos);    
       this.usuarioForm.enable();
+      this.recaptchaToken = null; // Reset del token después del registro
       this.router.navigate(['/login']);
 
       this.snackBar.open('Usuario registrado correctamente', 'Cerrar', {
@@ -149,5 +173,11 @@ export class RegisterComponent
       this.nuevaEspecialidad = '';
       this.usuarioForm.get('especialidad')?.setValue(nueva);
     }
+  }
+
+  // reCAPTCHA callback
+  onCaptchaResolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
+    console.log('reCAPTCHA token:', captchaResponse);
   }
 }

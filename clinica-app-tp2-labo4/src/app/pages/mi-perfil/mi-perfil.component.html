@@ -1,0 +1,277 @@
+<div class="perfil-container">
+  <div class="perfil-content">
+    <!-- Información del perfil -->
+    <mat-card class="perfil-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon>
+          Mi Perfil
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content *ngIf="usuario">
+        <div class="perfil-info">
+          <!-- Imágenes -->
+          <div class="imagenes-container">
+            <div class="imagen-principal" *ngIf="usuario.imagen">
+              <img [src]="usuario.imagen" alt="Foto de perfil" />
+            </div>
+            <div class="imagen-secundaria" *ngIf="usuario.imagen2">
+              <img [src]="usuario.imagen2" alt="Segunda foto" />
+            </div>
+          </div>
+
+          <!-- Datos personales -->
+          <div class="datos-personales">
+            <div class="dato-item">
+              <mat-icon>badge</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Nombre completo</span>
+                <span class="dato-value">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+              <mat-icon>email</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Email</span>
+                <span class="dato-value">{{ usuario.email }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+              <mat-icon>credit_card</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">DNI</span>
+                <span class="dato-value">{{ usuario.dni }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+              <mat-icon>cake</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Edad</span>
+                <span class="dato-value">{{ usuario.edad }} años</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+              <mat-icon>assignment_ind</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Tipo de usuario</span>
+                <span class="dato-value tipo-usuario">{{ usuario.tipoUsuario }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item" *ngIf="usuario.obraSocial">
+              <mat-icon>local_hospital</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Obra Social</span>
+                <span class="dato-value">{{ usuario.obraSocial }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item" *ngIf="usuario.especialidad">
+              <mat-icon>medical_services</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Especialidad(es)</span>
+                <div class="especialidades-chips">
+                  <mat-chip-set>
+                    <mat-chip *ngFor="let esp of especialidades">{{ esp }}</mat-chip>
+                  </mat-chip-set>
+                </div>
+              </div>
+            </div>
+
+            <div class="dato-item" *ngIf="usuario.tipoUsuario === 'especialista'">
+              <mat-icon>{{ usuario.habilitado ? 'check_circle' : 'cancel' }}</mat-icon>
+              <div class="dato-content">
+                <span class="dato-label">Estado</span>
+                <span class="dato-value" [class.habilitado]="usuario.habilitado" [class.no-habilitado]="!usuario.habilitado">
+                  {{ usuario.habilitado ? 'Habilitado' : 'No habilitado' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sección de horarios (solo para especialistas) -->
+    <mat-card class="horarios-card" *ngIf="esEspecialista()">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>schedule</mat-icon>
+          Mis Horarios
+        </mat-card-title>
+        <mat-card-subtitle>
+          Gestiona tu disponibilidad horaria
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Formulario para gestionar horarios -->
+        <div class="crear-horarios-section">
+          <h3>Configurar días y horarios de trabajo</h3>
+
+          <div class="info-hint">
+            <mat-icon>info</mat-icon>
+            <p>
+              Configure los días de la semana y el horario de atención para cada especialidad. 
+              Los turnos se generarán automáticamente cada 30 minutos dentro del rango horario seleccionado.
+            </p>
+          </div>
+          
+          <div class="form-row">
+            <!-- Selector de especialidad -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Especialidad</mat-label>
+              <mat-select [(ngModel)]="especialidadSeleccionada" (selectionChange)="onEspecialidadChange()">
+                <mat-option *ngFor="let esp of especialidades" [value]="esp">
+                  {{ esp }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>medical_services</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Selector de días de la semana -->
+          <div class="dias-selection" *ngIf="especialidadSeleccionada">
+            <div class="dias-header">
+              <h4>Seleccione los días de trabajo:</h4>
+              <button 
+                mat-stroked-button 
+                color="primary"
+                (click)="seleccionarTodosLosDias()"
+                class="btn-seleccionar-todos">
+                <mat-icon>{{ todosDiasMarcados() ? 'deselect' : 'select_all' }}</mat-icon>
+                {{ todosDiasMarcados() ? 'Deseleccionar' : 'Seleccionar' }} todos
+              </button>
+            </div>
+            
+            <div class="dias-grid">
+              <button 
+                *ngFor="let dia of diasSemana"
+                mat-raised-button
+                [color]="isDiaSeleccionado(dia.numero) ? 'primary' : ''"
+                (click)="toggleDia(dia.numero)"
+                class="dia-btn"
+                [class.seleccionado]="isDiaSeleccionado(dia.numero)">
+                <mat-icon *ngIf="isDiaSeleccionado(dia.numero)">check_circle</mat-icon>
+                <mat-icon *ngIf="!isDiaSeleccionado(dia.numero)">radio_button_unchecked</mat-icon>
+                <span class="dia-nombre">{{ dia.nombre }}</span>
+              </button>
+            </div>
+
+            <!-- Selector de horario -->
+            <div class="horario-selector">
+              <h4>Configure el horario de atención:</h4>
+              
+              <div class="horario-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Hora de inicio</mat-label>
+                  <mat-select [(ngModel)]="horaInicio">
+                    <mat-option *ngFor="let hora of horasDisponibles" [value]="hora.valor">
+                      {{ hora.texto }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>access_time</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Hora de fin</mat-label>
+                  <mat-select [(ngModel)]="horaFin">
+                    <mat-option *ngFor="let hora of getHorasFinDisponibles()" [value]="hora.valor">
+                      {{ hora.texto }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>access_time</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <div class="horario-info-card">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <p><strong>Turnos cada 30 minutos</strong></p>
+                  <p class="subtitle" *ngIf="horaInicio && horaFin && horaFin > horaInicio">
+                    {{ calcularTurnosPorDia() }} turnos disponibles por día
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="acciones-horarios">
+              <p *ngIf="diasSeleccionados.length > 0" class="seleccionados-count">
+                {{ diasSeleccionados.length }} día(s) seleccionado(s)
+              </p>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="guardarHorarios()"
+                [disabled]="diasSeleccionados.length === 0 || cargando">
+                <mat-icon>save</mat-icon>
+                Guardar configuración
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Lista de horarios configurados -->
+        <div class="horarios-existentes-section">
+          <h3>
+            <mat-icon>event_available</mat-icon>
+            Configuraciones de horarios
+          </h3>
+
+          <div *ngIf="cargando" class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Cargando horarios...</p>
+          </div>
+
+          <div *ngIf="!cargando && horariosExistentes.length === 0" class="no-horarios">
+            <mat-icon>event_busy</mat-icon>
+            <p>No hay horarios configurados aún</p>
+            <p class="subtitle">Configure sus días de trabajo usando el formulario superior</p>
+          </div>
+
+          <div *ngIf="!cargando && horariosExistentes.length > 0" class="horarios-list">
+            <mat-card *ngFor="let horario of horariosExistentes" class="horario-item">
+              <mat-card-content>
+                <div class="horario-info">
+                  <div class="horario-especialidad">
+                    <mat-icon>medical_services</mat-icon>
+                    <span class="especialidad-nombre">{{ horario.especialidad }}</span>
+                  </div>
+                  
+                  <div class="horario-dias">
+                    <mat-icon>calendar_month</mat-icon>
+                    <span>{{ obtenerDiasFormateados(horario.dias) }}</span>
+                  </div>
+
+                  <div class="horario-horas">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ obtenerHorarioFormateado(horario.horario) }}</span>
+                  </div>
+                </div>
+
+                <div class="horario-acciones">
+                  <button 
+                    mat-icon-button 
+                    color="warn" 
+                    (click)="eliminarHorario(horario)"
+                    [disabled]="cargando"
+                    matTooltip="Eliminar configuración">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+

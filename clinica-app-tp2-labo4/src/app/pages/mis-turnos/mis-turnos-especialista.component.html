@@ -1,32 +1,165 @@
-<div *ngIf="cargando">Cargando...</div>
+<div class="mis-turnos-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>event_available</mat-icon>
+        Mis Turnos
+      </mat-card-title>
+      <mat-card-subtitle>
+        Gestione sus turnos asignados
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
 
-<mat-list *ngIf="!cargando">
+  <!-- Filtros -->
+  <mat-card class="filtros-card">
+    <mat-card-content>
+      <div class="filtros-container">
+        <h3>
+          <mat-icon>filter_list</mat-icon>
+          Filtrar Turnos
+        </h3>
+        
+        <div class="filtro-row">
+          <mat-form-field appearance="outline" class="filtro-input">
+            <mat-label>Buscar por Especialidad o Paciente</mat-label>
+            <input
+              matInput
+              [(ngModel)]="filtroTexto"
+              (ngModelChange)="onFiltroChange()"
+              placeholder="Ej: Cardiología, Juan Pérez...">
+            <mat-icon matPrefix>search</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              *ngIf="filtroTexto"
+              (click)="limpiarFiltros()"
+              matTooltip="Limpiar filtro">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-form-field>
 
-  <mat-list-item *ngFor="let t of turnos">
-
-    <div class="flex-col w-full">
-      <div>{{t.paciente}}</div>
-      <div>{{t.fecha | date:'dd/MM/yyyy HH:mm'}}</div>
-
-      <mat-chip [color]="t.estadoTurno=='realizado' ? 'primary' : 'accent'" selected>
-        {{ t.estadoTurno | uppercase }}
-      </mat-chip>
-
-      <div class="pt-2 flex gap-2">
-
-        <button *ngIf="t.estadoTurno=='pendiente'" mat-raised-button color="primary" (click)="aceptar(t)">Aceptar</button>
-
-        <button *ngIf="t.estadoTurno=='aceptado'" mat-raised-button color="primary" (click)="finalizar(t)">Finalizar</button>
-
-        <button *ngIf="t.estadoTurno=='pendiente'" mat-raised-button color="warn" (click)="cancelar(t)">Cancelar</button>
-
-        <button *ngIf="t.estadoTurno=='pendiente'" mat-stroked-button color="warn" (click)="rechazar(t)">Rechazar</button>
-
-        <button *ngIf="t.comentario" mat-stroked-button (click)="verResenna(t)">Ver Reseña</button>
-
+          <div class="filtro-info">
+            <mat-icon>info</mat-icon>
+            <span>Mostrando {{ turnosFiltrados.length }} de {{ turnos.length }} turnos</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </mat-card-content>
+  </mat-card>
 
-  </mat-list-item>
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando turnos...</p>
+  </div>
 
-</mat-list>
+  <!-- Sin turnos -->
+  <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos">
+    <mat-icon>event_busy</mat-icon>
+    <p>No tiene turnos asignados</p>
+    <p class="subtitle">Los turnos aparecerán aquí cuando los pacientes los soliciten</p>
+  </mat-card>
+
+  <!-- Lista de turnos -->
+  <div *ngIf="!cargando && turnosFiltrados.length > 0" class="turnos-list">
+    <mat-card *ngFor="let turno of turnosFiltrados" class="turno-card">
+      <mat-card-content>
+        <div class="turno-content">
+          <!-- Header con estado -->
+          <div class="turno-header">
+            <mat-chip [class]="getEstadoClass(turno.estadoTurno)">
+              <mat-icon>{{ getEstadoIcon(turno.estadoTurno) }}</mat-icon>
+              {{ getEstadoTexto(turno.estadoTurno) }}
+            </mat-chip>
+          </div>
+
+          <!-- Info principal -->
+          <div class="turno-info-principal">
+            <div class="turno-fecha">
+              <mat-icon>calendar_today</mat-icon>
+              <div>
+                <span class="info-label">Fecha y Hora</span>
+                <span class="info-valor">{{ formatearFecha(turno.fecha) }}</span>
+              </div>
+            </div>
+
+            <div class="turno-especialidad">
+              <mat-icon>medical_services</mat-icon>
+              <div>
+                <span class="info-label">Especialidad</span>
+                <span class="info-valor">{{ turno.especialidad }}</span>
+              </div>
+            </div>
+
+            <div class="turno-paciente">
+              <mat-icon>person</mat-icon>
+              <div>
+                <span class="info-label">Paciente</span>
+                <span class="info-valor">{{ turno.nombrePaciente }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="turno-acciones">
+            <button
+              *ngIf="puedeAceptar(turno)"
+              mat-raised-button
+              color="primary"
+              (click)="aceptarTurno(turno)">
+              <mat-icon>check_circle</mat-icon>
+              Aceptar
+            </button>
+
+            <button
+              *ngIf="puedeFinalizar(turno)"
+              mat-raised-button
+              color="accent"
+              (click)="finalizarTurno(turno)">
+              <mat-icon>done_all</mat-icon>
+              Finalizar
+            </button>
+
+            <button
+              *ngIf="puedeRechazar(turno)"
+              mat-stroked-button
+              color="warn"
+              (click)="rechazarTurno(turno)">
+              <mat-icon>block</mat-icon>
+              Rechazar
+            </button>
+
+            <button
+              *ngIf="puedeCancelar(turno)"
+              mat-stroked-button
+              color="warn"
+              (click)="cancelarTurno(turno)">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+
+            <button
+              *ngIf="puedeVerResenia(turno)"
+              mat-stroked-button
+              color="primary"
+              (click)="verResenia(turno)">
+              <mat-icon>description</mat-icon>
+              Ver Reseña
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Sin resultados de filtro -->
+  <mat-card *ngIf="!cargando && turnos.length > 0 && turnosFiltrados.length === 0" class="no-resultados">
+    <mat-icon>search_off</mat-icon>
+    <p>No se encontraron turnos con el filtro aplicado</p>
+    <button mat-raised-button color="primary" (click)="limpiarFiltros()">
+      <mat-icon>clear</mat-icon>
+      Limpiar Filtros
+    </button>
+  </mat-card>
+</div>

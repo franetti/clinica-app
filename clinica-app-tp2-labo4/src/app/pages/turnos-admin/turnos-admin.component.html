@@ -1,12 +1,12 @@
-<div class="mis-turnos-container">
+<div class="turnos-admin-container">
   <mat-card class="header-card">
     <mat-card-header>
       <mat-card-title>
-        <mat-icon>event</mat-icon>
-        Mis Turnos
+        <mat-icon>event_note</mat-icon>
+        Gestión de Turnos - Clínica
       </mat-card-title>
       <mat-card-subtitle>
-        Gestione sus turnos solicitados
+        Administración de todos los turnos de la clínica
       </mat-card-subtitle>
     </mat-card-header>
   </mat-card>
@@ -22,12 +22,12 @@
         
         <div class="filtro-row">
           <mat-form-field appearance="outline" class="filtro-input">
-            <mat-label>Buscar por Especialidad o Especialista</mat-label>
+            <mat-label>Buscar por Especialidad, Especialista o Paciente</mat-label>
             <input
               matInput
               [(ngModel)]="filtroTexto"
               (ngModelChange)="onFiltroChange()"
-              placeholder="Ej: Cardiología, Dr. García...">
+              placeholder="Ej: Cardiología, Dr. García, Juan Pérez...">
             <mat-icon matPrefix>search</mat-icon>
             <button
               mat-icon-button
@@ -57,33 +57,21 @@
   <!-- Sin turnos -->
   <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos">
     <mat-icon>event_busy</mat-icon>
-    <p>No tiene turnos solicitados</p>
-    <button mat-raised-button color="primary" routerLink="/solicitar-turno">
-      <mat-icon>add</mat-icon>
-      Solicitar Turno
-    </button>
+    <p>No hay turnos registrados en la clínica</p>
   </mat-card>
 
   <!-- Lista de turnos -->
   <div *ngIf="!cargando && turnosFiltrados.length > 0" class="turnos-list">
-    <mat-card *ngFor="let turno of turnosFiltrados" class="turno-card">
+    <mat-card *ngFor="let turno of turnosFiltrados" class="turno-card" [class.turno-cancelado]="turno.estadoTurno === 'cancelado'">
       <mat-card-content>
         <div class="turno-content">
-          <!-- Header con estado -->
-          <div class="turno-header">
-            <mat-chip [class]="getEstadoClass(turno.estadoTurno)">
-              <mat-icon>{{ getEstadoIcon(turno.estadoTurno) }}</mat-icon>
-              {{ getEstadoTexto(turno.estadoTurno) }}
-            </mat-chip>
-          </div>
-
           <!-- Info principal -->
           <div class="turno-info-principal">
             <div class="turno-fecha">
               <mat-icon>calendar_today</mat-icon>
               <div>
-                <span class="info-label">Fecha y Hora</span>
-                <span class="info-valor">{{ formatearFecha(turno.fecha) }}</span>
+                <span class="fecha-label">Fecha y Hora</span>
+                <span class="fecha-valor">{{ formatearFecha(turno.fecha) }}</span>
               </div>
             </div>
 
@@ -94,8 +82,19 @@
                 <span class="info-valor">{{ turno.especialidad }}</span>
               </div>
             </div>
+          </div>
 
-            <div class="turno-especialista">
+          <!-- Info personas -->
+          <div class="turno-personas">
+            <div class="persona-info">
+              <mat-icon>person</mat-icon>
+              <div>
+                <span class="info-label">Paciente</span>
+                <span class="info-valor">{{ turno.nombrePaciente }}</span>
+              </div>
+            </div>
+
+            <div class="persona-info">
               <mat-icon>local_hospital</mat-icon>
               <div>
                 <span class="info-label">Especialista</span>
@@ -104,49 +103,39 @@
             </div>
           </div>
 
-          <!-- Calificación si existe -->
-          <div *ngIf="turno.calificacion" class="turno-calificacion">
-            <mat-icon>star</mat-icon>
-            <span>Su calificación: {{ turno.calificacion }} estrellas</span>
+          <!-- Estado -->
+          <div class="turno-estado">
+            <mat-chip [class]="getEstadoClass(turno.estadoTurno)">
+              <mat-icon>{{ getEstadoIcon(turno.estadoTurno) }}</mat-icon>
+              {{ getEstadoTexto(turno.estadoTurno) }}
+            </mat-chip>
+          </div>
+
+          <!-- Comentario si existe -->
+          <div *ngIf="turno.comentario" class="turno-comentario">
+            <mat-icon>comment</mat-icon>
+            <div>
+              <span class="comentario-label">Comentario:</span>
+              <span class="comentario-texto">{{ turno.comentario }}</span>
+            </div>
           </div>
 
           <!-- Acciones -->
           <div class="turno-acciones">
             <button
               *ngIf="puedeCancelar(turno)"
-              mat-stroked-button
-              color="warn"
-              (click)="cancelarTurno(turno)">
-              <mat-icon>cancel</mat-icon>
-              Cancelar
-            </button>
-
-            <button
-              *ngIf="puedeVerResenia(turno)"
-              mat-stroked-button
-              color="primary"
-              (click)="verResenia(turno)">
-              <mat-icon>description</mat-icon>
-              Ver Reseña
-            </button>
-
-            <button
-              *ngIf="puedeCompletarEncuesta(turno)"
-              mat-stroked-button
-              color="accent"
-              (click)="completarEncuesta(turno)">
-              <mat-icon>assignment</mat-icon>
-              Completar Encuesta
-            </button>
-
-            <button
-              *ngIf="puedeCalificar(turno) && !turno.calificacion"
               mat-raised-button
-              color="accent"
-              (click)="calificarAtencion(turno)">
-              <mat-icon>star</mat-icon>
-              Calificar Atención
+              color="warn"
+              (click)="abrirDialogoCancelar(turno)"
+              matTooltip="Cancelar turno">
+              <mat-icon>cancel</mat-icon>
+              Cancelar Turno
             </button>
+            
+            <span *ngIf="!puedeCancelar(turno)" class="no-cancelable">
+              <mat-icon>info</mat-icon>
+              No se puede cancelar
+            </span>
           </div>
         </div>
       </mat-card-content>
@@ -163,3 +152,5 @@
     </button>
   </mat-card>
 </div>
+
+

@@ -1,0 +1,844 @@
+.perfil-container {
+  min-height: 100vh;
+  padding: 2rem;
+
+}
+
+.perfil-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// Card de perfil
+.perfil-card {
+  mat-card-header {
+    //background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #3f51b5;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px 8px 0 0;
+    margin: -16px -16px 0 -16px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      margin: 0;
+      
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 2rem;
+  }
+}
+
+.perfil-info {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.imagenes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  .imagen-principal,
+  .imagen-secundaria {
+    img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #667eea;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .imagen-secundaria img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.datos-personales {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dato-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+  }
+
+  mat-icon {
+    color: #667eea;
+    margin-top: 0.25rem;
+  }
+
+  .dato-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .dato-label {
+      font-size: 0.875rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    .dato-value {
+      font-size: 1rem;
+      color: #212529;
+      font-weight: 600;
+
+      &.tipo-usuario {
+        text-transform: capitalize;
+        color: #667eea;
+      }
+
+      &.habilitado {
+        color: #28a745;
+      }
+
+      &.no-habilitado {
+        color: #dc3545;
+      }
+    }
+  }
+}
+
+.especialidades-chips {
+  mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  mat-chip {
+    background-color: #667eea !important;
+    color: white !important;
+  }
+}
+
+// Card de horarios
+.horarios-card {
+  mat-card-header {
+    background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px 8px 0 0;
+    margin: -16px -16px 0 -16px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      margin: 0;
+
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    mat-card-subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 0.5rem;
+    }
+  }
+
+  mat-card-content {
+    padding: 2rem;
+  }
+}
+
+.crear-horarios-section {
+  h3 {
+    color: #2193b0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .modo-selector {
+    background: #f0f8ff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #2193b0;
+
+    mat-checkbox {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .info-hint {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      margin-bottom: 0;
+      color: #495057;
+      font-size: 0.875rem;
+      line-height: 1.4;
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        color: #2193b0;
+        margin-top: 0.1rem;
+      }
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .form-field {
+      width: 100%;
+    }
+  }
+
+  .info-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: #f0f8ff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #2193b0;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      color: #2193b0;
+      margin-top: 0.1rem;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      color: #495057;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Selector de días
+.dias-selection {
+  margin-top: 2rem;
+
+  .dias-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h4 {
+      color: #495057;
+      margin: 0;
+    }
+
+    .btn-seleccionar-todos {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  .dias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .dia-btn {
+      height: 70px;
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      text-transform: none;
+      padding: 0.5rem;
+
+      &.seleccionado {
+        background-color: #2193b0 !important;
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(33, 147, 176, 0.3);
+      }
+
+      &:not(.seleccionado):hover {
+        background-color: #e9ecef;
+        transform: translateY(-2px);
+      }
+
+      mat-icon {
+        font-size: 1.8rem;
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+
+      .dia-nombre {
+        font-size: 0.95rem;
+        font-weight: 500;
+        line-height: 1.2;
+      }
+    }
+  }
+
+  .horario-selector {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+
+    h4 {
+      color: #495057;
+      margin: 0 0 1rem 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .horario-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      .form-field {
+        width: 100%;
+      }
+    }
+
+    .horario-info-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #e7f3ff;
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 3px solid #2193b0;
+
+      mat-icon {
+        color: #2193b0;
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      p {
+        margin: 0;
+        color: #495057;
+        font-size: 0.9rem;
+        line-height: 1.4;
+
+        &.subtitle {
+          font-size: 0.85rem;
+          color: #6c757d;
+          margin-top: 0.25rem;
+        }
+
+        strong {
+          color: #2193b0;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.horarios-selection {
+  margin-top: 2rem;
+
+  .horarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h4 {
+      color: #495057;
+      margin: 0;
+    }
+
+    .btn-seleccionar-todos {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  .info-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.horarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+
+  .horario-btn {
+    height: 50px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &.seleccionado {
+      background-color: #2193b0 !important;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    &.ocupado {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    mat-icon {
+      font-size: 1.2rem;
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+.acciones-horarios {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+
+  .seleccionados-count {
+    margin: 0;
+    color: #495057;
+    font-weight: 500;
+  }
+
+  button {
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.rango-info {
+  margin-top: 2rem;
+
+  .info-card {
+    margin-bottom: 1rem;
+    background: #f0f8ff;
+    border-left: 4px solid #2193b0;
+
+    .resumen-rango {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+
+      > mat-icon {
+        color: #2193b0;
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+      }
+
+      h4 {
+        color: #2193b0;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+      }
+
+      p {
+        margin: 0.5rem 0;
+        color: #495057;
+        line-height: 1.6;
+      }
+
+      .total-horarios {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 6px;
+        font-size: 1rem;
+
+        strong {
+          color: #2193b0;
+        }
+      }
+    }
+  }
+}
+
+mat-divider {
+  margin: 2rem 0;
+}
+
+.horarios-existentes-section {
+  h3 {
+    color: #2193b0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.no-horarios {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 1rem 0 0;
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #adb5bd;
+  }
+}
+
+.horarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.horario-item {
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  mat-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .horario-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    flex: 1;
+    align-items: center;
+
+    .horario-especialidad,
+    .horario-dias,
+    .horario-horas {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      mat-icon {
+        color: #2193b0;
+        font-size: 1.3rem;
+        width: 1.3rem;
+        height: 1.3rem;
+      }
+
+      span {
+        font-size: 0.95rem;
+        color: #495057;
+      }
+
+      .especialidad-nombre {
+        font-weight: 600;
+        color: #2193b0;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .horario-acciones {
+    display: flex;
+    gap: 0.5rem;
+
+    button[disabled] {
+      opacity: 0.3;
+    }
+  }
+}
+
+.turnos-existentes-section {
+  h3 {
+    color: #2193b0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+
+  p {
+    color: #6c757d;
+  }
+}
+
+.no-turnos {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 1rem 0 0;
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #adb5bd;
+  }
+}
+
+.turnos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.fecha-grupo {
+  .fecha-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+
+    mat-icon {
+      color: #2193b0;
+    }
+  }
+}
+
+.turnos-fecha {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.turno-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .turno-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+
+    .turno-hora,
+    .turno-especialidad {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        color: #6c757d;
+      }
+    }
+
+    .turno-estado {
+      margin-top: 0.5rem;
+
+      mat-chip {
+        font-size: 0.85rem;
+        min-height: 28px;
+
+        &.con-paciente {
+          background-color: #28a745 !important;
+          color: white !important;
+        }
+
+        &.sin-paciente {
+          background-color: #ffc107 !important;
+          color: #212529 !important;
+        }
+
+        mat-icon {
+          font-size: 1rem;
+          margin-right: 0.25rem;
+        }
+      }
+    }
+  }
+
+  .turno-acciones {
+    display: flex;
+    gap: 0.5rem;
+
+    button[disabled] {
+      opacity: 0.3;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .perfil-container {
+    padding: 1rem;
+  }
+
+  .horarios-header,
+  .dias-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .btn-seleccionar-todos {
+      width: 100%;
+    }
+  }
+
+  .dias-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+
+    .dia-btn {
+      height: 60px;
+      font-size: 0.9rem;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+
+  .horario-selector .horario-row {
+    grid-template-columns: 1fr;
+  }
+
+  .horario-item mat-card-content {
+    flex-direction: column;
+    gap: 1rem;
+
+    .horario-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .horario-acciones {
+      align-self: flex-end;
+    }
+  }
+
+  .horarios-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .turnos-fecha {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-horarios {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .rango-info {
+    .resumen-rango {
+      flex-direction: column;
+    }
+  }
+}
+

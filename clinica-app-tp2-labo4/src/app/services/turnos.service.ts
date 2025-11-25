@@ -121,4 +121,40 @@ export class TurnosService {
     return data as TurnoDTO;
   }
 
+  /**
+   * Eliminar turnos múltiples
+   */
+  async eliminarTurnos(ids: string[]): Promise<void> {
+    const { error } = await this.supabase.getClient()
+      .from('turnos')
+      .delete()
+      .in('id', ids);
+
+    if (error) throw error;
+  }
+
+  /**
+   * Obtener turnos disponibles por especialidad y fecha
+   */
+  async obtenerTurnosDisponibles(especialidad: string, fechaInicio?: string, fechaFin?: string): Promise<TurnoDTO[]> {
+    let query = this.supabase.getClient()
+      .from('turnos')
+      .select('*')
+      .eq('especialidad', especialidad)
+      .eq('habilitado', true)
+      .is('paciente', null);
+
+    if (fechaInicio) {
+      query = query.gte('fecha', fechaInicio);
+    }
+    if (fechaFin) {
+      query = query.lte('fecha', fechaFin);
+    }
+
+    const { data, error } = await query.order('fecha', { ascending: true });
+
+    if (error) throw error;
+    return data as TurnoDTO[];
+  }
+
 }

@@ -5,14 +5,33 @@
       <mat-toolbar color="primary">Menú</mat-toolbar>
         <mat-nav-list>
             <ng-container *ngIf="userSession?.tipoUsuario === 'admin'; " >  
-                      <a mat-list-item routerLink="/usuarios">Usuarios</a>
+                      <a mat-list-item routerLink="/usuarios">
+                        <mat-icon>people</mat-icon>
+                        Usuarios
+                      </a>
+                      <a mat-list-item routerLink="/turnos">
+                        <mat-icon>event_note</mat-icon>
+                        Turnos
+                      </a>
             </ng-container>
             <!-- <a mat-list-item routerLink="/login">Login</a>
             <a mat-list-item routerLink="/registro">Registro</a> -->
             <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'admin'">
-              <a mat-list-item routerLink="/solicitar-turno">Solicitar Turno</a>
+              <a mat-list-item routerLink="/solicitar-turno">
+                <mat-icon>add_circle</mat-icon>
+                Solicitar Turno
+              </a>
             </ng-container>
-            <a mat-list-item routerLink="/mis-turnos">Mis Turnos</a>
+            <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'especialista'">
+              <a mat-list-item routerLink="/mis-turnos">
+                <mat-icon>event</mat-icon>
+                Mis Turnos
+              </a>
+            </ng-container>
+            <a mat-list-item routerLink="/mi-perfil">
+              <mat-icon>person</mat-icon>
+              Mi Perfil
+            </a>
             <a mat-list-item  (click)="logout()">Cerrar sesión</a>
         </mat-nav-list>
     </mat-sidenav>
@@ -30,9 +49,11 @@
     <span class="spacer"></span>
 
     <ng-container *ngIf="userSession; " >    
-      <div style="gap:10px;display: flex;">
+      <div style="gap:10px;display: flex;align-items: center;">
         <span>{{ userSession.nombre }} {{ userSession.apellido }}</span>
-
+        <button mat-icon-button routerLink="/mi-perfil" matTooltip="Mi Perfil">
+          <mat-icon>account_circle</mat-icon>
+        </button>
       </div>
     </ng-container>
   </mat-toolbar>

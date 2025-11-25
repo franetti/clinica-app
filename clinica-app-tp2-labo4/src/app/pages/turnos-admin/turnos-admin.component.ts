@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,25 +15,15 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TurnosService, TurnoDTO, EstadoTurno } from '../../services/turnos.service';
 import { UsuariosService } from '../../services/usuarios.service';
 import { UsuarioDTO } from '../../models/usuario';
-import {
-  CancelarTurnoDialogComponent
-} from './dialogs/cancelar-turno-dialog.component';
-import {
-  RechazarTurnoDialogComponent
-} from './dialogs/rechazar-turno-dialog.component';
-import {
-  FinalizarTurnoDialogComponent
-} from './dialogs/finalizar-turno-dialog.component';
-import {
-  VerReseniaDialogComponent
-} from './dialogs/ver-resenia-dialog.component';
+import { CancelarTurnoDialogComponent } from './cancelar-turno-dialog.component';
 
 interface TurnoConNombres extends TurnoDTO {
   nombrePaciente?: string;
+  nombreEspecialista?: string;
 }
 
 @Component({
-  selector: 'app-mis-turnos-especialista',
+  selector: 'app-turnos-admin',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,24 +33,24 @@ interface TurnoConNombres extends TurnoDTO {
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
+    MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
     MatSnackBarModule
   ],
-  templateUrl: './mis-turnos-especialista.component.html',
-  styleUrls: ['./mis-turnos.component.scss']
+  templateUrl: './turnos-admin.component.html',
+  styleUrls: ['./turnos-admin.component.scss']
 })
-export class MisTurnosEspecialistaComponent implements OnInit {
-  @Input() idUsuario: string = "";
-  
+export class TurnosAdminComponent implements OnInit {
   turnos: TurnoConNombres[] = [];
   turnosFiltrados: TurnoConNombres[] = [];
   pacientes: UsuarioDTO[] = [];
+  especialistas: UsuarioDTO[] = [];
   cargando = false;
-  
-  // Filtro
+
+  // Filtros
   filtroTexto: string = '';
 
   constructor(
@@ -70,30 +61,35 @@ export class MisTurnosEspecialistaComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    if (this.idUsuario) {
-      await this.cargarDatos();
-    }
+    await this.cargarDatos();
   }
 
   async cargarDatos() {
     this.cargando = true;
     try {
-      const [turnos, pacientes] = await Promise.all([
-        this.turnosService.obtenerTurnosEspecialista(this.idUsuario),
-        this.usuariosService.getPacientes().toPromise()
+      // Cargar turnos, pacientes y especialistas en paralelo
+      const [turnos, pacientes, especialistas] = await Promise.all([
+        this.turnosService.obtenerTurnos(),
+        this.usuariosService.getPacientes().toPromise(),
+        this.usuariosService.getEspecialistas().toPromise()
       ]);
 
+      this.turnos = turnos;
       this.pacientes = pacientes || [];
-      this.turnos = turnos.map(t => this.enriquecerTurnoConNombres(t));
-      
+      this.especialistas = especialistas || [];
+
+      // Enriquecer turnos con nombres
+      this.turnos = this.turnos.map(turno => this.enriquecerTurnoConNombres(turno));
+
       // Ordenar por fecha (más recientes primero)
       this.turnos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-      
+
       this.aplicarFiltros();
     } catch (error) {
-      console.error('Error al cargar turnos:', error);
+      console.error('Error al cargar datos:', error);
       this.snackBar.open('Error al cargar los turnos', 'Cerrar', {
-        duration: 3000
+        duration: 3000,
+        panelClass: ['snack-error']
       });
     } finally {
       this.cargando = false;
@@ -102,9 +98,12 @@ export class MisTurnosEspecialistaComponent implements OnInit {
 
   enriquecerTurnoConNombres(turno: TurnoDTO): TurnoConNombres {
     const paciente = this.pacientes.find(p => p.id === turno.paciente);
+    const especialista = this.especialistas.find(e => e.id === turno.especialista);
+
     return {
       ...turno,
-      nombrePaciente: paciente ? `${paciente.nombre} ${paciente.apellido}` : 'Sin asignar'
+      nombrePaciente: paciente ? `${paciente.nombre} ${paciente.apellido}` : 'Sin asignar',
+      nombreEspecialista: especialista ? `Dr./Dra. ${especialista.nombre} ${especialista.apellido}` : 'Desconocido'
     };
   }
 
@@ -118,9 +117,12 @@ export class MisTurnosEspecialistaComponent implements OnInit {
 
     this.turnosFiltrados = this.turnos.filter(turno => {
       const especialidad = (turno.especialidad || '').toLowerCase();
+      const nombreEspecialista = (turno.nombreEspecialista || '').toLowerCase();
       const nombrePaciente = (turno.nombrePaciente || '').toLowerCase();
-      
-      return especialidad.includes(filtro) || nombrePaciente.includes(filtro);
+
+      return especialidad.includes(filtro) ||
+             nombreEspecialista.includes(filtro) ||
+             nombrePaciente.includes(filtro);
     });
   }
 
@@ -133,45 +135,25 @@ export class MisTurnosEspecialistaComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  // Validaciones de acciones
   puedeCancelar(turno: TurnoDTO): boolean {
     const estadosNoCancelables: EstadoTurno[] = ['aceptado', 'realizado', 'rechazado'];
     return !estadosNoCancelables.includes(turno.estadoTurno || 'pendiente');
   }
 
-  puedeRechazar(turno: TurnoDTO): boolean {
-    const estadosNoRechazables: EstadoTurno[] = ['aceptado', 'realizado', 'cancelado'];
-    return !estadosNoRechazables.includes(turno.estadoTurno || 'pendiente');
-  }
-
-  puedeAceptar(turno: TurnoDTO): boolean {
-    const estadosNoAceptables: EstadoTurno[] = ['realizado', 'cancelado', 'rechazado'];
-    return !estadosNoAceptables.includes(turno.estadoTurno || 'pendiente');
-  }
-
-  puedeFinalizar(turno: TurnoDTO): boolean {
-    return turno.estadoTurno === 'aceptado';
-  }
-
-  puedeVerResenia(turno: TurnoDTO): boolean {
-    return !!(turno.comentario || turno.resenia);
-  }
-
-  // Acciones
-  cancelarTurno(turno: TurnoConNombres) {
+  abrirDialogoCancelar(turno: TurnoConNombres) {
     const dialogRef = this.dialog.open(CancelarTurnoDialogComponent, {
       width: '500px',
-      data: { turno, rol: 'especialista' }
+      data: { turno }
     });
 
     dialogRef.afterClosed().subscribe(async (comentario: string) => {
       if (comentario) {
-        await this.ejecutarCancelacion(turno, comentario);
+        await this.cancelarTurno(turno, comentario);
       }
     });
   }
 
-  private async ejecutarCancelacion(turno: TurnoDTO, comentario: string) {
+  async cancelarTurno(turno: TurnoConNombres, comentario: string) {
     this.cargando = true;
     try {
       await this.turnosService.actualizarTurno(turno.id, {
@@ -180,126 +162,23 @@ export class MisTurnosEspecialistaComponent implements OnInit {
       });
 
       this.snackBar.open('Turno cancelado exitosamente', 'Cerrar', {
-        duration: 3000
+        duration: 3000,
+        panelClass: ['snack-exito']
       });
 
+      // Recargar datos
       await this.cargarDatos();
     } catch (error) {
       console.error('Error al cancelar turno:', error);
       this.snackBar.open('Error al cancelar el turno', 'Cerrar', {
-        duration: 3000
+        duration: 3000,
+        panelClass: ['snack-error']
       });
     } finally {
       this.cargando = false;
     }
   }
 
-  rechazarTurno(turno: TurnoConNombres) {
-    const dialogRef = this.dialog.open(RechazarTurnoDialogComponent, {
-      width: '500px',
-      data: { turno }
-    });
-
-    dialogRef.afterClosed().subscribe(async (comentario: string) => {
-      if (comentario) {
-        await this.ejecutarRechazo(turno, comentario);
-      }
-    });
-  }
-
-  private async ejecutarRechazo(turno: TurnoDTO, comentario: string) {
-    this.cargando = true;
-    try {
-      await this.turnosService.actualizarTurno(turno.id, {
-        estadoTurno: 'rechazado',
-        comentario: comentario
-      });
-
-      this.snackBar.open('Turno rechazado exitosamente', 'Cerrar', {
-        duration: 3000
-      });
-
-      await this.cargarDatos();
-    } catch (error) {
-      console.error('Error al rechazar turno:', error);
-      this.snackBar.open('Error al rechazar el turno', 'Cerrar', {
-        duration: 3000
-      });
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  aceptarTurno(turno: TurnoConNombres) {
-    this.ejecutarAceptacion(turno);
-  }
-
-  private async ejecutarAceptacion(turno: TurnoDTO) {
-    this.cargando = true;
-    try {
-      await this.turnosService.actualizarTurno(turno.id, {
-        estadoTurno: 'aceptado'
-      });
-
-      this.snackBar.open('Turno aceptado exitosamente', 'Cerrar', {
-        duration: 3000
-      });
-
-      await this.cargarDatos();
-    } catch (error) {
-      console.error('Error al aceptar turno:', error);
-      this.snackBar.open('Error al aceptar el turno', 'Cerrar', {
-        duration: 3000
-      });
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  finalizarTurno(turno: TurnoConNombres) {
-    const dialogRef = this.dialog.open(FinalizarTurnoDialogComponent, {
-      width: '600px',
-      data: { turno }
-    });
-
-    dialogRef.afterClosed().subscribe(async (comentario: string) => {
-      if (comentario) {
-        await this.ejecutarFinalizacion(turno, comentario);
-      }
-    });
-  }
-
-  private async ejecutarFinalizacion(turno: TurnoDTO, comentario: string) {
-    this.cargando = true;
-    try {
-      await this.turnosService.actualizarTurno(turno.id, {
-        estadoTurno: 'realizado',
-        comentario: comentario
-      });
-
-      this.snackBar.open('Turno finalizado exitosamente', 'Cerrar', {
-        duration: 3000
-      });
-
-      await this.cargarDatos();
-    } catch (error) {
-      console.error('Error al finalizar turno:', error);
-      this.snackBar.open('Error al finalizar el turno', 'Cerrar', {
-        duration: 3000
-      });
-    } finally {
-          this.cargando = false;
-    }
-  }
-
-  verResenia(turno: TurnoConNombres) {
-    this.dialog.open(VerReseniaDialogComponent, {
-      width: '600px',
-      data: { turno, rol: 'especialista' }
-    });
-  }
-
-  // Helpers
   formatearFecha(fechaStr: string): string {
     const fecha = new Date(fechaStr);
     return fecha.toLocaleDateString('es-AR', {
@@ -345,3 +224,5 @@ export class MisTurnosEspecialistaComponent implements OnInit {
     }
   }
 }
+
+
