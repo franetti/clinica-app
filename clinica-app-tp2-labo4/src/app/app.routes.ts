@@ -17,22 +17,19 @@ export const routes: Routes = [
             {
                 path: 'usuarios',
                 loadComponent: () => import('./pages/usuarios/usuarios.page').then(m => m.UsuariosPage),
-                //meter guard de admin
             },
             {
                 path: 'turnos',
                 loadComponent: () => import('./pages/turnos-admin/turnos-admin.component').then(m => m.TurnosAdminComponent),
-                //meter guard de admin
             },
             {
                 path: 'estadisticas',
                 loadComponent: () => import('./pages/estadisticas/estadisticas.component').then(m => m.EstadisticasComponent),
-                //meter guard de admin
             },
             {
                 path: 'login',
                 loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
-                canDeactivate: [] //agregar guard para redirigir si ya esta logueado
+                canDeactivate: []
             },
             {
                 path: 'register',
@@ -59,11 +56,7 @@ export const routes: Routes = [
                 path: '',
                 redirectTo: 'home',
                 pathMatch: 'full'
-            },
-            // {
-            // path: '**',
-            // redirectTo: 'home' // o a 'pagenotfound'
-            // }
+            }
         ]
     }
 ];

@@ -10,7 +10,6 @@
     </mat-card-header>
   </mat-card>
 
-  <!-- Filtros -->
   <mat-card class="filtros-card">
     <mat-card-content>
       <div class="filtros-container">
@@ -39,27 +38,19 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Loading -->
   <div *ngIf="cargando" class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Cargando turnos...</p>
   </div>
 
-  <!-- Sin turnos -->
   <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos" style="display: flex; flex-direction: column; align-items: center;">
     <p>No tiene turnos solicitados</p>
-    <!-- <button mat-raised-button color="primary" routerLink="/solicitar-turno">
-      <mat-icon>add</mat-icon>
-      Solicitar Turno
-    </button> -->
   </mat-card>
 
-  <!-- Lista de turnos -->
   <div *ngIf="!cargando && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length > 0" class="turnos-list">
     <mat-card *ngFor="let turno of turnos | filtroTurnos:filtroTexto:opcionesFiltro" class="turno-card">
       <mat-card-content>
         <div class="turno-content">
-          <!-- Header con estado -->
        <div class="turno-header" >
             <p style="font-weight: blod;font-size: 30px; margin: 0;">Estado: </p>
             <mat-chip [class]="turno.estadoTurno | estadoTurno:'clase'" style="margin-left: 10px; font-size: 18px;display: flex; align-items: center; padding: 5px 10px;">
@@ -68,7 +59,6 @@
             </mat-chip>
           </div>
 
-          <!-- Info principal -->
           <div class="turno-info-principal">
             <div class="turno-fecha">
               <div>
@@ -92,12 +82,10 @@
             </div>
           </div>
 
-          <!-- Calificación si existe -->
           <div *ngIf="turno.calificacion" class="turno-calificacion">
             <span>Su calificación: {{ turno.calificacion }} estrellas</span>
           </div>
 
-          <!-- Acciones -->
           <div class="turno-acciones">
             <button
               *ngIf="puedeCancelar(turno)"
@@ -116,14 +104,6 @@
             </button>
 
             <button
-              *ngIf="puedeCompletarEncuesta(turno)"
-              mat-stroked-button
-              color="accent"
-              (click)="completarEncuesta(turno)">
-              Completar Encuesta
-            </button>
-
-            <button
               *ngIf="puedeCalificar(turno) && !turno.calificacion"
               mat-raised-button
               color="accent"
@@ -136,7 +116,6 @@
     </mat-card>
   </div>
 
-  <!-- Sin resultados de filtro -->
   <mat-card *ngIf="!cargando && turnos.length > 0 && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length === 0" class="no-resultados">
     <mat-icon>search_off</mat-icon>
     <p>No se encontraron turnos con el filtro aplicado</p>

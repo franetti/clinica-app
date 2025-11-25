@@ -151,7 +151,7 @@
 // Card de horarios
 .horarios-card {
   mat-card-header {
-    background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    background-color: var(--mat-primary-500, #3f51b5);
     color: white;
     padding: 1.5rem;
     border-radius: 8px 8px 0 0;
@@ -845,7 +845,7 @@ mat-divider {
 // Card de historia clínica
 .historia-clinica-card {
   mat-card-header {
-    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    background-color: var(--mat-accent-500, #4caf50);
     color: white;
     padding: 1.5rem;
     border-radius: 8px 8px 0 0;

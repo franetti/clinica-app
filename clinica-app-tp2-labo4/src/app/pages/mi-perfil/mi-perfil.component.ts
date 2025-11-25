@@ -24,6 +24,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { HistoriaClinicaFormatoPipe } from '../../pipes/historia-clinica-formato.pipe';
 import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 import { EstadoTurnoPipe } from '../../pipes/estado-turno.pipe';
+import { HoverZoomDirective } from '../../directives/hover-zoom.directive';
+import { HighlightDirective } from '../../directives/highlight.directive';
 import jsPDF from 'jspdf';
 
 @Component({
@@ -47,7 +49,9 @@ import jsPDF from 'jspdf';
     MatDividerModule,
     MatTooltipModule,
     HistoriaClinicaFormatoPipe,
-    DniFormatoPipe
+    DniFormatoPipe,
+    HoverZoomDirective,
+    HighlightDirective
   ],
   templateUrl: './mi-perfil.component.html',
   styleUrls: ['./mi-perfil.component.scss']
@@ -56,15 +60,13 @@ export class MiPerfilComponent implements OnInit {
   usuario: UsuarioDTO | null = null;
   especialidades: string[] = [];
 
-  // Para la gestión de horarios
   especialidadSeleccionada: string = '';
-  diasSeleccionados: number[] = []; // 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes
-  horaInicio: number = 9; // Hora de inicio (0-23)
-  horaFin: number = 18; // Hora de fin (0-23)
+  diasSeleccionados: number[] = [];
+  horaInicio: number = 9;
+  horaFin: number = 18;
   horariosExistentes: HorarioDTO[] = [];
   cargando = false;
 
-  // Días de la semana
   diasSemana = [
     { numero: 1, nombre: 'Lunes', corto: 'L' },
     { numero: 2, nombre: 'Martes', corto: 'M' },
@@ -73,7 +75,6 @@ export class MiPerfilComponent implements OnInit {
     { numero: 5, nombre: 'Viernes', corto: 'V' }
   ];
 
-  // Horarios disponibles para selección (8 AM - 8 PM)
   horasDisponibles = [
     { valor: 8, texto: '8:00 AM' },
     { valor: 9, texto: '9:00 AM' },
@@ -90,7 +91,6 @@ export class MiPerfilComponent implements OnInit {
     { valor: 20, texto: '8:00 PM' }
   ];
 
-  // Para historia clínica (pacientes)
   historiaClinica: HistoriaClinicaDTO[] = [];
   historiaClinicaCompleta: HistoriaClinicaDTO[] = [];
   historiaClinicaFiltrada: HistoriaClinicaDTO[] = [];
@@ -115,7 +115,6 @@ export class MiPerfilComponent implements OnInit {
     this.authService.getUser().subscribe(async user => {
       this.usuario = user;
       if (user?.especialidad) {
-        // Las especialidades pueden estar separadas por comas
         this.especialidades = user.especialidad.split(',').map(e => e.trim());
         if (this.especialidades.length > 0) {
           this.especialidadSeleccionada = this.especialidades[0];
@@ -148,7 +147,6 @@ export class MiPerfilComponent implements OnInit {
     try {
       this.turnosPaciente = await this.turnosService.obtenerTurnosPaciente(idPaciente);
 
-      // Extraer especialidades únicas de los turnos
       const especialidadesSet = new Set<string>();
       this.turnosPaciente.forEach(turno => {
         if (turno.especialidad) {
@@ -165,10 +163,7 @@ export class MiPerfilComponent implements OnInit {
   }
 
   relacionarHistoriaConTurnos(): void {
-    // Agregar especialidad a cada registro de historia clínica
-    // Buscar el turno más cercano en fecha que coincida con especialista y paciente
     this.historiaClinicaCompleta = this.historiaClinica.map(historia => {
-      // Buscar turnos que coincidan con el especialista y paciente
       const turnosRelacionados = this.turnosPaciente.filter(turno =>
         turno.especialista === historia.idEspecialista &&
         turno.paciente === historia.idPaciente &&

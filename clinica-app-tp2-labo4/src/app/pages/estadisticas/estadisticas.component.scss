@@ -39,9 +39,9 @@
   gap: 20px;
 }
 
-.graficos-grid {
+.reportes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   
   @media (max-width: 768px) {
@@ -49,28 +49,32 @@
   }
 }
 
-.grafico-card {
+.reporte-card {
   mat-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 10px;
     
     mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 0;
     }
   }
   
   mat-card-content {
     padding: 20px;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 100px;
+    
+    p {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+    }
   }
   
-  canvas {
-    max-height: 400px;
+  mat-card-actions {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
   }
 }
 

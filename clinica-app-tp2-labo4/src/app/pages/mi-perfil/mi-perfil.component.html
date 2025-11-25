@@ -1,6 +1,5 @@
 <div class="perfil-container">
   <div class="perfil-content">
-    <!-- Información del perfil -->
     <mat-card class="perfil-card">
       <mat-card-header>
         <mat-card-title>
@@ -10,14 +9,12 @@
       
       <mat-card-content *ngIf="usuario">
         <div class="perfil-info">
-          <!-- Imágenes -->
           <div class="imagenes-container">
             <div class="imagen-principal" *ngIf="usuario.imagen">
-              <img [src]="usuario.imagen" alt="Foto de perfil" />
+              <img [src]="usuario.imagen" alt="Foto de perfil" appHoverZoom />
             </div>
           </div>
 
-          <!-- Datos personales -->
           <div class="datos-personales">
             <div class="dato-item">
               <div class="dato-content">
@@ -75,7 +72,9 @@
             <div class="dato-item" *ngIf="usuario.tipoUsuario === 'especialista'">
               <div class="dato-content">
                 <span class="dato-label">Estado</span>
-                <span class="dato-value" [class.habilitado]="usuario.habilitado" [class.no-habilitado]="!usuario.habilitado">
+                <span class="dato-value" 
+                      [appHighlight]="usuario.habilitado" 
+                      [highlightCondition]="'enabled'">
                   {{ usuario.habilitado ? 'Habilitado' : 'No habilitado' }}
                 </span>
               </div>
@@ -85,7 +84,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Sección de horarios (solo para especialistas) -->
     <mat-card class="horarios-card" *ngIf="esEspecialista()">
       <mat-card-header>
         <mat-card-title>
@@ -97,7 +95,6 @@
       </mat-card-header>
 
       <mat-card-content>
-        <!-- Formulario para gestionar horarios -->
         <div class="crear-horarios-section">
           <h3>Configurar días y horarios de trabajo</h3>
 
@@ -109,7 +106,6 @@
           </div>
           
           <div class="form-row">
-            <!-- Selector de especialidad -->
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Especialidad</mat-label>
               <mat-select [(ngModel)]="especialidadSeleccionada" (selectionChange)="onEspecialidadChange()">
@@ -120,7 +116,6 @@
             </mat-form-field>
           </div>
 
-          <!-- Selector de días de la semana -->
           <div class="dias-selection" *ngIf="especialidadSeleccionada">
             <div class="dias-header">
               <h4>Seleccione los días de trabajo:</h4>
@@ -145,7 +140,6 @@
               </button>
             </div>
 
-            <!-- Selector de horario -->
             <div class="horario-selector">
               <h4>Configure el horario de atención:</h4>
               
@@ -193,7 +187,6 @@
 
         <mat-divider></mat-divider>
 
-        <!-- Lista de horarios configurados -->
         <div class="horarios-existentes-section">
           <h3>
             Configuraciones de horarios
@@ -243,7 +236,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Sección de Historia Clínica (solo para pacientes) -->
     <mat-card class="historia-clinica-card" *ngIf="esPaciente()">
       <mat-card-header>
         <mat-card-title>
@@ -255,7 +247,6 @@
       </mat-card-header>
 
       <mat-card-content>
-        <!-- Selector de especialidad y botón de descarga -->
         <div class="historia-clinica-controls" *ngIf="!cargando && historiaClinica.length > 0">
           <mat-form-field appearance="outline" style="flex: 1; margin-right: 10px;">
             <mat-label>Filtrar por Especialidad</mat-label>

@@ -10,8 +10,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import * as XLSX from 'xlsx';
 import { LogService } from '../../services/log.service';
 import { TurnosService, TurnoDTO } from '../../services/turnos.service';
@@ -33,7 +32,7 @@ import { UsuarioDTO } from '../../models/usuario';
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
-    BaseChartDirective
+    MatTooltipModule
   ],
   templateUrl: './estadisticas.component.html',
   styleUrl: './estadisticas.component.scss'
@@ -43,127 +42,21 @@ export class EstadisticasComponent implements OnInit {
   fechaInicio: Date | null = null;
   fechaFin: Date | null = null;
 
-  // Datos
   logs: any[] = [];
   turnos: TurnoDTO[] = [];
   usuarios: UsuarioDTO[] = [];
   usuariosMap: Map<string, UsuarioDTO> = new Map();
 
-  // Gráfico 1: Log de ingresos
-  public logIngresosChartType: ChartType = 'bar';
-  public logIngresosChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{
-      label: 'Ingresos',
-      data: [],
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1
-    }]
-  };
-  public logIngresosChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: { display: true },
-      title: { display: true, text: 'Log de Ingresos al Sistema' }
-    },
-    scales: {
-      y: { beginAtZero: true }
+  private obtenerTurnosFiltrados(): TurnoDTO[] {
+    let turnosFiltrados = this.turnos;
+    if (this.fechaInicio && this.fechaFin) {
+      turnosFiltrados = this.turnos.filter(t => {
+        const fechaTurno = new Date(t.fecha);
+        return fechaTurno >= this.fechaInicio! && fechaTurno <= this.fechaFin!;
+      });
     }
-  };
-
-  // Gráfico 2: Turnos por especialidad
-  public turnosEspecialidadChartType: ChartType = 'pie';
-  public turnosEspecialidadChartData: ChartData<'pie'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(54, 162, 235, 0.6)',
-        'rgba(255, 206, 86, 0.6)',
-        'rgba(75, 192, 192, 0.6)',
-        'rgba(153, 102, 255, 0.6)',
-        'rgba(255, 159, 64, 0.6)'
-      ]
-    }]
-  };
-  public turnosEspecialidadChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: { display: true, position: 'right' },
-      title: { display: true, text: 'Cantidad de Turnos por Especialidad' }
-    }
-  };
-
-  // Gráfico 3: Turnos por día
-  public turnosDiaChartType: ChartType = 'line';
-  public turnosDiaChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: [{
-      label: 'Turnos',
-      data: [],
-      borderColor: 'rgba(75, 192, 192, 1)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      tension: 0.1
-    }]
-  };
-  public turnosDiaChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: { display: true },
-      title: { display: true, text: 'Cantidad de Turnos por Día' }
-    },
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
-
-  // Gráfico 4: Turnos solicitados por médico
-  public turnosSolicitadosChartType: ChartType = 'bar';
-  public turnosSolicitadosChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{
-      label: 'Turnos Solicitados',
-      data: [],
-      backgroundColor: 'rgba(255, 99, 132, 0.6)',
-      borderColor: 'rgba(255, 99, 132, 1)',
-      borderWidth: 1
-    }]
-  };
-  public turnosSolicitadosChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: { display: true },
-      title: { display: true, text: 'Turnos Solicitados por Médico' }
-    },
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
-
-  // Gráfico 5: Turnos finalizados por médico
-  public turnosFinalizadosChartType: ChartType = 'bar';
-  public turnosFinalizadosChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: [{
-      label: 'Turnos Finalizados',
-      data: [],
-      backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1
-    }]
-  };
-  public turnosFinalizadosChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    plugins: {
-      legend: { display: true },
-      title: { display: true, text: 'Turnos Finalizados por Médico' }
-    },
-    scales: {
-      y: { beginAtZero: true }
-    }
-  };
+    return turnosFiltrados;
+  }
 
   constructor(
     private logService: LogService,
@@ -179,7 +72,6 @@ export class EstadisticasComponent implements OnInit {
   async cargarDatos() {
     this.cargando = true;
     try {
-      // Cargar usuarios
       this.usuarios = await this.usuariosService.getAll().toPromise() || [];
       this.usuarios.forEach(u => {
         if (u.id) {
@@ -187,13 +79,9 @@ export class EstadisticasComponent implements OnInit {
         }
       });
 
-      // Cargar logs
       this.logs = await this.logService.obtenerLogsConUsuarios();
-      this.actualizarGraficoLogs();
 
-      // Cargar turnos
       this.turnos = await this.turnosService.obtenerTurnos();
-      this.actualizarGraficosTurnos();
     } catch (error) {
       console.error('Error al cargar datos:', error);
       this.snackBar.open('Error al cargar los datos', 'Cerrar', { duration: 3000 });
@@ -202,136 +90,9 @@ export class EstadisticasComponent implements OnInit {
     }
   }
 
-  actualizarGraficoLogs() {
-    // Agrupar logs por día
-    const logsPorDia = new Map<string, number>();
-    this.logs.forEach(log => {
-      if (log.created_at) {
-        const fecha = new Date(log.created_at);
-        const dia = fecha.toLocaleDateString('es-AR');
-        logsPorDia.set(dia, (logsPorDia.get(dia) || 0) + 1);
-      }
-    });
-
-    const dias = Array.from(logsPorDia.keys()).sort();
-    const cantidades = dias.map(dia => logsPorDia.get(dia) || 0);
-
-    this.logIngresosChartData = {
-      labels: dias,
-      datasets: [{
-        label: 'Ingresos',
-        data: cantidades,
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
-      }]
-    };
-  }
-
-  actualizarGraficosTurnos() {
-    // Filtrar turnos por rango de fechas si está definido
-    let turnosFiltrados = this.turnos;
-    if (this.fechaInicio && this.fechaFin) {
-      turnosFiltrados = this.turnos.filter(t => {
-        const fechaTurno = new Date(t.fecha);
-        return fechaTurno >= this.fechaInicio! && fechaTurno <= this.fechaFin!;
-      });
-    }
-
-    // Gráfico 2: Turnos por especialidad
-    const turnosPorEspecialidad = new Map<string, number>();
-    turnosFiltrados.forEach(turno => {
-      const especialidad = turno.especialidad || 'Sin especialidad';
-      turnosPorEspecialidad.set(especialidad, (turnosPorEspecialidad.get(especialidad) || 0) + 1);
-    });
-
-    this.turnosEspecialidadChartData = {
-      labels: Array.from(turnosPorEspecialidad.keys()),
-      datasets: [{
-        data: Array.from(turnosPorEspecialidad.values()),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)'
-        ]
-      }]
-    };
-
-    // Gráfico 3: Turnos por día
-    const turnosPorDia = new Map<string, number>();
-    turnosFiltrados.forEach(turno => {
-      const fecha = new Date(turno.fecha);
-      const dia = fecha.toLocaleDateString('es-AR');
-      turnosPorDia.set(dia, (turnosPorDia.get(dia) || 0) + 1);
-    });
-
-    const dias = Array.from(turnosPorDia.keys()).sort((a, b) => {
-      return new Date(a).getTime() - new Date(b).getTime();
-    });
-    const cantidadesPorDia = dias.map(dia => turnosPorDia.get(dia) || 0);
-
-    this.turnosDiaChartData = {
-      labels: dias,
-      datasets: [{
-        label: 'Turnos',
-        data: cantidadesPorDia,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.1
-      }]
-    };
-
-    // Gráfico 4: Turnos solicitados por médico
-    const turnosSolicitadosPorMedico = new Map<string, number>();
-    turnosFiltrados.forEach(turno => {
-      if (turno.especialista) {
-        const medico = this.usuariosMap.get(turno.especialista);
-        const nombreMedico = medico ? `${medico.nombre} ${medico.apellido}` : 'Desconocido';
-        turnosSolicitadosPorMedico.set(nombreMedico, (turnosSolicitadosPorMedico.get(nombreMedico) || 0) + 1);
-      }
-    });
-
-    this.turnosSolicitadosChartData = {
-      labels: Array.from(turnosSolicitadosPorMedico.keys()),
-      datasets: [{
-        label: 'Turnos Solicitados',
-        data: Array.from(turnosSolicitadosPorMedico.values()),
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
-      }]
-    };
-
-    // Gráfico 5: Turnos finalizados por médico
-    const turnosFinalizadosPorMedico = new Map<string, number>();
-    turnosFiltrados
-      .filter(t => t.estadoTurno === 'realizado')
-      .forEach(turno => {
-        if (turno.especialista) {
-          const medico = this.usuariosMap.get(turno.especialista);
-          const nombreMedico = medico ? `${medico.nombre} ${medico.apellido}` : 'Desconocido';
-          turnosFinalizadosPorMedico.set(nombreMedico, (turnosFinalizadosPorMedico.get(nombreMedico) || 0) + 1);
-        }
-      });
-
-    this.turnosFinalizadosChartData = {
-      labels: Array.from(turnosFinalizadosPorMedico.keys()),
-      datasets: [{
-        label: 'Turnos Finalizados',
-        data: Array.from(turnosFinalizadosPorMedico.values()),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-      }]
-    };
-  }
-
   aplicarFiltroFechas() {
     if (this.fechaInicio && this.fechaFin) {
-      this.actualizarGraficosTurnos();
+      this.snackBar.open('Filtro aplicado. Los reportes usarán este rango de fechas.', 'Cerrar', { duration: 3000 });
     } else {
       this.snackBar.open('Seleccione ambas fechas', 'Cerrar', { duration: 3000 });
     }
@@ -340,7 +101,7 @@ export class EstadisticasComponent implements OnInit {
   limpiarFiltroFechas() {
     this.fechaInicio = null;
     this.fechaFin = null;
-    this.actualizarGraficosTurnos();
+    this.snackBar.open('Filtro limpiado', 'Cerrar', { duration: 2000 });
   }
 
   descargarExcelLogs() {
@@ -360,51 +121,185 @@ export class EstadisticasComponent implements OnInit {
   }
 
   descargarExcelTurnosEspecialidad() {
-    const datos: any[] = [];
-    this.turnosEspecialidadChartData.labels?.forEach((label, index) => {
-      datos.push({
-        'Especialidad': label,
-        'Cantidad': this.turnosEspecialidadChartData.datasets[0].data[index]
+    const turnosFiltrados = this.obtenerTurnosFiltrados();
+    const turnosPorEspecialidad = new Map<string, any[]>();
+
+    turnosFiltrados.forEach(turno => {
+      const especialidad = turno.especialidad || 'Sin especialidad';
+      if (!turnosPorEspecialidad.has(especialidad)) {
+        turnosPorEspecialidad.set(especialidad, []);
+      }
+      const fecha = new Date(turno.fecha);
+      const medico = turno.especialista ? this.usuariosMap.get(turno.especialista) : null;
+      const paciente = turno.paciente ? this.usuariosMap.get(turno.paciente) : null;
+
+      turnosPorEspecialidad.get(especialidad)!.push({
+        'Fecha': fecha.toLocaleDateString('es-AR'),
+        'Hora': fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+        'Médico': medico ? `${medico.nombre} ${medico.apellido}` : 'N/A',
+        'Paciente': paciente ? `${paciente.nombre} ${paciente.apellido}` : 'N/A',
+        'Estado': turno.estadoTurno || 'N/A'
       });
     });
 
-    this.descargarExcel(datos, 'Turnos_Por_Especialidad');
+    const datos: any[] = [];
+    turnosPorEspecialidad.forEach((turnos, especialidad) => {
+      datos.push({
+        'Especialidad': especialidad,
+        'Cantidad Total': turnos.length,
+        'Detalle': `Ver hoja "${especialidad}"`
+      });
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datos), 'Resumen');
+
+    turnosPorEspecialidad.forEach((turnos, especialidad) => {
+      const nombreHoja = especialidad.substring(0, 31); // Excel limita nombres de hojas a 31 caracteres
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(turnos), nombreHoja);
+    });
+
+    XLSX.writeFile(wb, `Turnos_Por_Especialidad_${new Date().toISOString().split('T')[0]}.xlsx`);
+    this.snackBar.open('Excel descargado correctamente', 'Cerrar', { duration: 3000 });
   }
 
   descargarExcelTurnosDia() {
-    const datos: any[] = [];
-    this.turnosDiaChartData.labels?.forEach((label, index) => {
-      datos.push({
-        'Día': label,
-        'Cantidad': this.turnosDiaChartData.datasets[0].data[index]
+    const turnosFiltrados = this.obtenerTurnosFiltrados();
+    const turnosPorDia = new Map<string, any[]>();
+
+    turnosFiltrados.forEach(turno => {
+      const fecha = new Date(turno.fecha);
+      const dia = fecha.toLocaleDateString('es-AR');
+      if (!turnosPorDia.has(dia)) {
+        turnosPorDia.set(dia, []);
+      }
+      const medico = turno.especialista ? this.usuariosMap.get(turno.especialista) : null;
+      const paciente = turno.paciente ? this.usuariosMap.get(turno.paciente) : null;
+
+      turnosPorDia.get(dia)!.push({
+        'Hora': fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+        'Especialidad': turno.especialidad || 'N/A',
+        'Médico': medico ? `${medico.nombre} ${medico.apellido}` : 'N/A',
+        'Paciente': paciente ? `${paciente.nombre} ${paciente.apellido}` : 'N/A',
+        'Estado': turno.estadoTurno || 'N/A'
       });
     });
 
-    this.descargarExcel(datos, 'Turnos_Por_Dia');
+    const datos: any[] = [];
+    const diasOrdenados = Array.from(turnosPorDia.keys()).sort((a, b) => {
+      return new Date(a).getTime() - new Date(b).getTime();
+    });
+
+    diasOrdenados.forEach(dia => {
+      const turnos = turnosPorDia.get(dia)!;
+      datos.push({
+        'Día': dia,
+        'Cantidad': turnos.length
+      });
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datos), 'Resumen');
+
+    turnosPorDia.forEach((turnos, dia) => {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(turnos), dia);
+    });
+
+    XLSX.writeFile(wb, `Turnos_Por_Dia_${new Date().toISOString().split('T')[0]}.xlsx`);
+    this.snackBar.open('Excel descargado correctamente', 'Cerrar', { duration: 3000 });
   }
 
   descargarExcelTurnosSolicitados() {
+    const turnosFiltrados = this.obtenerTurnosFiltrados();
+    const turnosPorMedico = new Map<string, any[]>();
+
+    turnosFiltrados.forEach(turno => {
+      if (turno.especialista) {
+        const medico = this.usuariosMap.get(turno.especialista);
+        const nombreMedico = medico ? `${medico.nombre} ${medico.apellido}` : 'Desconocido';
+
+        if (!turnosPorMedico.has(nombreMedico)) {
+          turnosPorMedico.set(nombreMedico, []);
+        }
+
+        const fecha = new Date(turno.fecha);
+        const paciente = turno.paciente ? this.usuariosMap.get(turno.paciente) : null;
+
+        turnosPorMedico.get(nombreMedico)!.push({
+          'Fecha': fecha.toLocaleDateString('es-AR'),
+          'Hora': fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+          'Especialidad': turno.especialidad || 'N/A',
+          'Paciente': paciente ? `${paciente.nombre} ${paciente.apellido}` : 'N/A',
+          'Estado': turno.estadoTurno || 'N/A'
+        });
+      }
+    });
+
     const datos: any[] = [];
-    this.turnosSolicitadosChartData.labels?.forEach((label, index) => {
+    turnosPorMedico.forEach((turnos, medico) => {
       datos.push({
-        'Médico': label,
-        'Cantidad de Turnos Solicitados': this.turnosSolicitadosChartData.datasets[0].data[index]
+        'Médico': medico,
+        'Cantidad de Turnos Solicitados': turnos.length
       });
     });
 
-    this.descargarExcel(datos, 'Turnos_Solicitados_Por_Medico');
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datos), 'Resumen');
+
+    turnosPorMedico.forEach((turnos, medico) => {
+      const nombreHoja = medico.substring(0, 31);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(turnos), nombreHoja);
+    });
+
+    XLSX.writeFile(wb, `Turnos_Solicitados_Por_Medico_${new Date().toISOString().split('T')[0]}.xlsx`);
+    this.snackBar.open('Excel descargado correctamente', 'Cerrar', { duration: 3000 });
   }
 
   descargarExcelTurnosFinalizados() {
+    const turnosFiltrados = this.obtenerTurnosFiltrados()
+      .filter(t => t.estadoTurno === 'realizado');
+
+    const turnosPorMedico = new Map<string, any[]>();
+
+    turnosFiltrados.forEach(turno => {
+      if (turno.especialista) {
+        const medico = this.usuariosMap.get(turno.especialista);
+        const nombreMedico = medico ? `${medico.nombre} ${medico.apellido}` : 'Desconocido';
+
+        if (!turnosPorMedico.has(nombreMedico)) {
+          turnosPorMedico.set(nombreMedico, []);
+        }
+
+        const fecha = new Date(turno.fecha);
+        const paciente = turno.paciente ? this.usuariosMap.get(turno.paciente) : null;
+
+        turnosPorMedico.get(nombreMedico)!.push({
+          'Fecha': fecha.toLocaleDateString('es-AR'),
+          'Hora': fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+          'Especialidad': turno.especialidad || 'N/A',
+          'Paciente': paciente ? `${paciente.nombre} ${paciente.apellido}` : 'N/A'
+        });
+      }
+    });
+
     const datos: any[] = [];
-    this.turnosFinalizadosChartData.labels?.forEach((label, index) => {
+    turnosPorMedico.forEach((turnos, medico) => {
       datos.push({
-        'Médico': label,
-        'Cantidad de Turnos Finalizados': this.turnosFinalizadosChartData.datasets[0].data[index]
+        'Médico': medico,
+        'Cantidad de Turnos Finalizados': turnos.length
       });
     });
 
-    this.descargarExcel(datos, 'Turnos_Finalizados_Por_Medico');
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datos), 'Resumen');
+
+    turnosPorMedico.forEach((turnos, medico) => {
+      const nombreHoja = medico.substring(0, 31);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(turnos), nombreHoja);
+    });
+
+    XLSX.writeFile(wb, `Turnos_Finalizados_Por_Medico_${new Date().toISOString().split('T')[0]}.xlsx`);
+    this.snackBar.open('Excel descargado correctamente', 'Cerrar', { duration: 3000 });
   }
 
   private descargarExcel(datos: any[], nombreArchivo: string) {

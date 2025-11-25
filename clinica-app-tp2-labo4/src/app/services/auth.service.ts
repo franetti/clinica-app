@@ -3,7 +3,6 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { Router, provideRouter } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
 import { UsuarioDTO } from '../models/usuario';
-//import { UserData } from '../models/user-data';/
 import { SupabaseService } from './supabase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LogService } from './log.service';
@@ -20,7 +19,7 @@ export class AuthService {
         private snackBar: MatSnackBar,
         private logService: LogService
     ) {
-        this.initSession(); // carga al iniciar
+        this.initSession();
     }
 
     private async initSession() {
@@ -57,8 +56,7 @@ export class AuthService {
                 email: email,
                 password: password
             }).then(async ({ data, error }) => {
-                // //TODO TOASTER  
-                if (error) {//
+                if (error) {
                     debugger
                     if (error.message.includes('Invalid login credentials')) {
                         this.snackBar.open('Credenciales invalidas', 'Cerrar', {
@@ -107,7 +105,6 @@ export class AuthService {
                         return;
                     }
                     else {
-                        // Registrar log de login
                         const user = this.currentUser$.value;
                         if (user && data.user) {
                             this.logService.registrarLog(data.user.id, 'login').catch(err => {
@@ -122,7 +119,6 @@ export class AuthService {
                             panelClass: ['snack-exito']
                         });
 
-                        // Redirigir según el tipo de usuario
                         if (user) {
                             switch (user.tipoUsuario) {
                                 case 'paciente':
@@ -173,7 +169,6 @@ export class AuthService {
         this.log(this.currentUser$.value?.id!, "Logout");
         this.currentUser$.next(null);
         this.router.navigate(['/home']);
-        //this.toastr.success("", 'Sesión cerrada correctamente');
     }
 
     async registrarUsuario(datos: UsuarioDTO) {
@@ -269,14 +264,11 @@ export class AuthService {
             });
         if (error) console.error('Error subiendo imagen:', error.message);
 
-        // Obtener public link
         const { data: publicData } = this.supabaseService.getClient()
             .storage
             .from('imagenes')
             .getPublicUrl(`users/${filename}`);
 
-
-        // El enlace público está acá
         const publicUrl = publicData.publicUrl;
 
         return publicUrl;

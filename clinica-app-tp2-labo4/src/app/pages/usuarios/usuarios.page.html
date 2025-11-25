@@ -10,8 +10,7 @@
     </div>
 </div>
 
-<mat-tab-group>
-  <!-- Tab Pacientes -->
+<mat-tab-group style="background-color: white;">
   <mat-tab label="Pacientes">
     <div class="usuarios-container">
       <div *ngIf="pacientes.length === 0" class="no-usuarios">
@@ -76,7 +75,6 @@
     </div>
   </mat-tab>
 
-  <!-- Tab Especialistas -->
   <mat-tab label="Especialistas">
     <div class="usuarios-container">
       <div *ngIf="especialistas.length === 0" class="no-usuarios">
@@ -114,7 +112,9 @@
               </div>
               <div class="info-item">
                 <span class="info-label">Estado:</span>
-                <mat-chip [class.habilitado]="especialista.habilitado" [class.no-habilitado]="!especialista.habilitado">
+                <mat-chip 
+                  [appHighlight]="especialista.habilitado" 
+                  [highlightCondition]="'enabled'">
                   {{ especialista.habilitado ? 'Habilitado' : 'No Habilitado' }}
                 </mat-chip>
               </div>

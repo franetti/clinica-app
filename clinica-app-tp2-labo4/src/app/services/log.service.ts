@@ -6,8 +6,8 @@ import { map } from 'rxjs/operators';
 export interface LogDTO {
     id?: number;
     created_at?: Date;
-    idUsuario: string; // UUID
-    tipoLog: string; // 'login', etc.
+    idUsuario: string;
+    tipoLog: string;
 }
 
 @Injectable({
@@ -18,9 +18,6 @@ export class LogService {
 
     constructor(private supabaseService: SupabaseService) { }
 
-    /**
-     * Registrar un log en la base de datos
-     */
     async registrarLog(idUsuario: string, tipoLog: string): Promise<void> {
         const log: LogDTO = {
             idUsuario,
@@ -37,9 +34,6 @@ export class LogService {
         }
     }
 
-    /**
-     * Obtener todos los logs de login
-     */
     obtenerLogsLogin(): Observable<LogDTO[]> {
         return from(
             this.supabaseService.getClient()
@@ -57,9 +51,6 @@ export class LogService {
         );
     }
 
-    /**
-     * Obtener logs con información del usuario
-     */
     async obtenerLogsConUsuarios(): Promise<any[]> {
         const { data: logs, error } = await this.supabaseService.getClient()
             .from(this.table)
@@ -76,7 +67,6 @@ export class LogService {
             return [];
         }
 
-        // Obtener usuarios para enriquecer los logs
         const { data: usuarios } = await this.supabaseService.getClient()
             .from('usuarios-datos')
             .select('id, nombre, apellido, email');
@@ -86,7 +76,6 @@ export class LogService {
             usuariosMap.set(u.id, u);
         });
 
-        // Enriquecer logs con información de usuarios
         return logs.map((log: any) => {
             const usuario = usuariosMap.get(log.idUsuario);
             return {

@@ -3,7 +3,6 @@
 <div class="register-container">
   <h2>Registro de Usuario</h2>
 
-  <!-- Selección de tipo de usuario -->
   <div class="seleccion-tipo" *ngIf="!mostrarFormulario" [@fadeIn]>
     <div class="botones-tipo-container">
       <button 
@@ -42,7 +41,6 @@
     </div>
   </div>
 
-  <!-- Formulario de registro -->
   <div class="formulario-container" *ngIf="mostrarFormulario" [@slideInDown]>
     <button mat-icon-button class="boton-volver" (click)="volverASeleccion()" matTooltip="Volver a selección">
       <mat-icon>arrow_back</mat-icon>
@@ -110,7 +108,6 @@
               </button>
           </div>
 
-          <!-- Mostrar especialidades seleccionadas -->
           <div *ngIf="especialidadesSeleccionadas.length > 0" class="especialidades-seleccionadas">
               <label>Especialidades seleccionadas:</label>
               <mat-chip-set>
@@ -162,18 +159,12 @@
           <input type="file" (change)="onFileSelected($event, 'imagen2', usuarioForm)" />
       </div>
 
-      <!-- reCAPTCHA -->
-      <div class="recaptcha-container">
-          <re-captcha 
-              [siteKey]="siteKey"
-              (resolved)="onCaptchaResolved($event)"
-              size="normal">
-          </re-captcha>
-          <p class="recaptcha-info">
-              <mat-icon>info</mat-icon>
-              Por favor, complete el captcha para continuar
-          </p>
-      </div>
+      <app-recaptcha-wrapper
+          [siteKey]="siteKey"
+          [size]="'normal'"
+          [showInfo]="true"
+          (captchaResolved)="onCaptchaResolved($event)">
+      </app-recaptcha-wrapper>
 
       <button mat-raised-button color="primary" type="submit">Registrar</button>
     </form>

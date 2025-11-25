@@ -128,7 +128,7 @@ mat-chip-option {
   
   &.boton-mas {
     .imagen-circular {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-color: var(--mat-primary-500, #3f51b5);
       border: 2px dashed #fff;
       
       mat-icon {

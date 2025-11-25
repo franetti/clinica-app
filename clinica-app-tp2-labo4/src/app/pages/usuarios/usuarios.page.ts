@@ -18,11 +18,12 @@ import { HistoriaClinicaService, HistoriaClinicaDTO, DatoDinamico } from '../../
 import { TurnosService, TurnoDTO } from '../../services/turnos.service';
 import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 import { HistoriaClinicaFormatoPipe } from '../../pipes/historia-clinica-formato.pipe';
+import { HighlightDirective } from '../../directives/highlight.directive';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatTableModule, MatButtonModule, MatIcon, RouterLink, MatDialogModule, MatCardModule, MatTooltipModule, MatChipsModule, MatProgressSpinnerModule, DniFormatoPipe, HistoriaClinicaFormatoPipe],
+  imports: [CommonModule, MatTabsModule, MatTableModule, MatButtonModule, MatIcon, RouterLink, MatDialogModule, MatCardModule, MatTooltipModule, MatChipsModule, MatProgressSpinnerModule, DniFormatoPipe, HistoriaClinicaFormatoPipe, HighlightDirective],
   templateUrl: './usuarios.page.html',
   styleUrls: ['./usuarios.page.scss']
 })
@@ -47,7 +48,6 @@ export class UsuariosPage implements OnInit {
   async loadEspecialistas(): Promise<void> {
     this.usuariosService.getEspecialistas().subscribe(data => {
       this.especialistas = data;
-      // Crear mapa para búsqueda rápida
       data.forEach(esp => {
         if (esp.id) {
           this.especialistasMap.set(esp.id, esp);
@@ -71,9 +71,7 @@ export class UsuariosPage implements OnInit {
   }
 
   descargarExcel() {
-    // Obtener todos los usuarios
     this.usuariosService.getAll().subscribe(usuarios => {
-      // Preparar datos para Excel
       const datosExcel = usuarios.map(usuario => ({
         'Nombre': usuario.nombre,
         'Apellido': usuario.apellido,
@@ -87,27 +85,24 @@ export class UsuariosPage implements OnInit {
         'Fecha Creación': usuario.fechaCreacion ? new Date(usuario.fechaCreacion).toLocaleDateString('es-AR') : ''
       }));
 
-      // Crear workbook y worksheet
       const worksheet = XLSX.utils.json_to_sheet(datosExcel);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
 
-      // Ajustar ancho de columnas
       const columnWidths = [
-        { wch: 15 }, // Nombre
-        { wch: 15 }, // Apellido
-        { wch: 25 }, // Email
-        { wch: 12 }, // DNI
-        { wch: 8 },  // Edad
-        { wch: 15 }, // Tipo Usuario
-        { wch: 15 }, // Obra Social
-        { wch: 20 }, // Especialidad
-        { wch: 12 }, // Habilitado
-        { wch: 15 }  // Fecha Creación
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 25 },
+        { wch: 12 },
+        { wch: 8 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 12 },
+        { wch: 15 }
       ];
       worksheet['!cols'] = columnWidths;
 
-      // Generar archivo Excel
       const fecha = new Date().toISOString().split('T')[0];
       const nombreArchivo = `usuarios_${fecha}.xlsx`;
       XLSX.writeFile(workbook, nombreArchivo);
@@ -141,7 +136,6 @@ export class UsuariosPage implements OnInit {
     this.descargandoUsuario = usuario.id;
 
     try {
-      // Obtener turnos según el tipo de usuario
       let turnos: TurnoDTO[] = [];
       if (usuario.tipoUsuario === 'paciente') {
         turnos = await this.turnosService.obtenerTurnosPaciente(usuario.id);
@@ -149,7 +143,6 @@ export class UsuariosPage implements OnInit {
         turnos = await this.turnosService.obtenerTurnosEspecialista(usuario.id);
       }
 
-      // Obtener todos los usuarios para obtener nombres de pacientes y especialistas
       const todosUsuarios = await this.usuariosService.getAll().toPromise() || [];
       const usuariosMap = new Map<string, UsuarioDTO>();
       todosUsuarios.forEach(u => {
@@ -158,7 +151,6 @@ export class UsuariosPage implements OnInit {
         }
       });
 
-      // Enriquecer turnos con nombres
       const turnosEnriquecidos = turnos.map(turno => {
         let nombreEspecialista = 'N/A';
         let nombrePaciente = 'N/A';
@@ -198,10 +190,8 @@ export class UsuariosPage implements OnInit {
         };
       });
 
-      // Crear workbook con dos hojas
       const workbook = XLSX.utils.book_new();
 
-      // Hoja 1: Información del Usuario
       const datosUsuario = [{
         'Nombre': usuario.nombre,
         'Apellido': usuario.apellido,
@@ -215,11 +205,9 @@ export class UsuariosPage implements OnInit {
       const wsUsuario = XLSX.utils.json_to_sheet(datosUsuario);
       XLSX.utils.book_append_sheet(workbook, wsUsuario, 'Información Usuario');
 
-      // Hoja 2: Turnos
       const wsTurnos = XLSX.utils.json_to_sheet(turnosEnriquecidos);
       XLSX.utils.book_append_sheet(workbook, wsTurnos, 'Turnos');
 
-      // Ajustar anchos de columnas
       wsUsuario['!cols'] = [
         { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 12 },
         { wch: 8 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
@@ -228,7 +216,6 @@ export class UsuariosPage implements OnInit {
         { wch: 12 }, { wch: 10 }, { wch: 25 }, { wch: 25 }, { wch: 20 }, { wch: 15 }
       ];
 
-      // Generar archivo
       const nombreArchivo = `usuario_${usuario.nombre}_${usuario.apellido}_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, nombreArchivo);
     } catch (error) {
@@ -250,7 +237,6 @@ export class UsuariosPage implements OnInit {
   }
 }
 
-// Componente de diálogo para mostrar historia clínica
 @Component({
   selector: 'app-historia-clinica-dialog',
   standalone: true,

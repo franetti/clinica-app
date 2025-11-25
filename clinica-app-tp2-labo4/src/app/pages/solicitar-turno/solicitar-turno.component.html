@@ -3,7 +3,6 @@
 
   <form [formGroup]="turnoForm" (ngSubmit)="onSubmit()" class="formulario">
     
-    <!-- Selector de Paciente (solo para admin) -->
     <mat-form-field appearance="fill" *ngIf="esAdmin">
       <mat-label>Paciente</mat-label>
       <mat-select formControlName="paciente">
@@ -13,7 +12,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Selector de Especialidad con Autocomplete -->
     <mat-form-field appearance="fill">
       <mat-label>Especialidad</mat-label>
       <input 
@@ -21,17 +19,11 @@
         matInput 
         formControlName="especialidad"        
         placeholder="Escriba para buscar...">
-      <!-- <mat-autocomplete #autoEspecialidad="matAutocomplete">
-        <mat-option *ngFor="let especialidad of especialidadesFiltradas | async" [value]="especialidad">
-          {{ especialidad }}
-        </mat-option>
-      </mat-autocomplete> -->
     </mat-form-field>
 
 
     <div class="botones-visuales-container">
       <div class="botones-grid">
-            <!-- Botones visuales de especialidades -->
       @if(turnoForm.get('especialidad')?.value) 
       {
             <div 
@@ -61,7 +53,6 @@
     </div>
      
 
-    <!-- Selector de Especialista -->
     <mat-form-field appearance="fill">
       <mat-label>Especialista</mat-label>
       <input 
@@ -72,7 +63,6 @@
         placeholder="Escriba para buscar...">
     </mat-form-field>
 
-    <!-- Botones visuales de especialistas -->
     <div class="botones-visuales-container">
       <div class="botones-grid">
        @if(especialistasFiltrados) 
@@ -112,7 +102,6 @@
       @if (turnoForm.get('especialista')?.value && diasDisponibles.length > 0) 
         {
         
-        <!-- Selector de Fecha -->
         <div class="seccion-fecha">
           <label class="label-seccion">Seleccione un día:</label>
           <div class="dias-container">
@@ -134,7 +123,6 @@
       }
     }
 
-    <!-- Selector de Horario -->
     <div class="seccion-horario" *ngIf="horariosDisponibles.length > 0">
       <label class="label-seccion">Seleccione un horario:</label>
       
@@ -169,7 +157,6 @@
       }    
     </div>
 
-    <!-- Botón de envío -->
     <div class="acciones">
       <button 
         mat-raised-button 

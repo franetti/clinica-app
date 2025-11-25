@@ -14,8 +14,6 @@
                         Estadísticas
                       </a>
             </ng-container>
-            <!-- <a mat-list-item routerLink="/login">Login</a>
-            <a mat-list-item routerLink="/registro">Registro</a> -->
             <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'admin'">
               <a mat-list-item routerLink="/solicitar-turno">
                 Solicitar Turno
@@ -65,10 +63,6 @@
       <ng-content></ng-content>
     </main>
 
-<!-- 
-        <mat-toolbar color="primary" class="footer">
-      <span>© 2025 Mi Empresa</span>
-    </mat-toolbar> -->
   </mat-sidenav-content>
 
 

@@ -11,7 +11,6 @@
     </mat-card-header>
   </mat-card>
 
-  <!-- Filtros -->
   <mat-card class="filtros-card">
     <mat-card-content>
       <div class="filtros-container">
@@ -42,24 +41,20 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Loading -->
   <div *ngIf="cargando" class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Cargando turnos...</p>
   </div>
 
-  <!-- Sin turnos -->
   <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos">
     <mat-icon>event_busy</mat-icon>
     <p>No hay turnos registrados en la clínica</p>
   </mat-card>
 
-  <!-- Lista de turnos -->
   <div *ngIf="!cargando && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length > 0" class="turnos-list">
     <mat-card *ngFor="let turno of turnos | filtroTurnos:filtroTexto:opcionesFiltro" class="turno-card" [class.turno-cancelado]="turno.estadoTurno === 'cancelado'">
       <mat-card-content>
         <div class="turno-content">
-          <!-- Info principal -->
           <div class="turno-info-principal">
             <div class="turno-fecha">
               <mat-icon>calendar_today</mat-icon>
@@ -78,7 +73,6 @@
             </div>
           </div>
 
-          <!-- Info personas -->
           <div class="turno-personas">
             <div class="persona-info">
               <mat-icon>person</mat-icon>
@@ -97,7 +91,6 @@
             </div>
           </div>
 
-          <!-- Estado -->
           <div class="turno-estado">
             <mat-chip [class]="turno.estadoTurno | estadoTurno:'clase'">
               <mat-icon>{{ turno.estadoTurno | estadoTurno:'icono' }}</mat-icon>
@@ -105,7 +98,6 @@
             </mat-chip>
           </div>
 
-          <!-- Comentario si existe -->
           <div *ngIf="turno.comentario" class="turno-comentario">
             <mat-icon>comment</mat-icon>
             <div>
@@ -114,7 +106,6 @@
             </div>
           </div>
 
-          <!-- Acciones -->
           <div class="turno-acciones">
             <button
               *ngIf="puedeCancelar(turno)"
@@ -131,7 +122,6 @@
     </mat-card>
   </div>
 
-  <!-- Sin resultados de filtro -->
   <mat-card *ngIf="!cargando && turnos.length > 0 && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length === 0" class="no-resultados">
     <mat-icon>search_off</mat-icon>
     <p>No se encontraron turnos con el filtro aplicado</p>

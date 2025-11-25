@@ -10,19 +10,16 @@
     </mat-card-header>
   </mat-card>
 
-  <!-- Loading -->
   <div *ngIf="cargando" class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Cargando pacientes...</p>
   </div>
 
-  <!-- Sin pacientes -->
   <mat-card *ngIf="!cargando && pacientes.length === 0" class="no-pacientes">
     <p>No hay pacientes atendidos aún</p>
     <p class="subtitle">Los pacientes aparecerán aquí después de que finalices sus turnos</p>
   </mat-card>
 
-  <!-- Cards de pacientes -->
   <div *ngIf="!cargando && pacientes.length > 0" class="pacientes-grid">
     <mat-card *ngFor="let paciente of pacientes" class="paciente-card">
       <mat-card-header>
