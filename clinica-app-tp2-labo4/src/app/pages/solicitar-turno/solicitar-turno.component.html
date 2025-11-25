@@ -8,7 +8,7 @@
       <mat-label>Paciente</mat-label>
       <mat-select formControlName="paciente">
         <mat-option *ngFor="let paciente of pacientes" [value]="paciente.id">
-          {{ paciente.nombre }} {{ paciente.apellido }} - DNI: {{ paciente.dni }}
+          {{ paciente.nombre }} {{ paciente.apellido }} - DNI: {{ paciente.dni | dniFormato:'conPuntos' }}
         </mat-option>
       </mat-select>
     </mat-form-field>

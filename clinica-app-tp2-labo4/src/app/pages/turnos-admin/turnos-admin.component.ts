@@ -16,6 +16,8 @@ import { TurnosService, TurnoDTO, EstadoTurno } from '../../services/turnos.serv
 import { UsuariosService } from '../../services/usuarios.service';
 import { UsuarioDTO } from '../../models/usuario';
 import { CancelarTurnoDialogComponent } from './cancelar-turno-dialog.component';
+import { EstadoTurnoPipe } from '../../pipes/estado-turno.pipe';
+import { FiltroTurnosPipe } from '../../pipes/filtro-turnos.pipe';
 
 interface TurnoConNombres extends TurnoDTO {
   nombrePaciente?: string;
@@ -38,14 +40,15 @@ interface TurnoConNombres extends TurnoDTO {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    EstadoTurnoPipe,
+    FiltroTurnosPipe
   ],
   templateUrl: './turnos-admin.component.html',
   styleUrls: ['./turnos-admin.component.scss']
 })
 export class TurnosAdminComponent implements OnInit {
   turnos: TurnoConNombres[] = [];
-  turnosFiltrados: TurnoConNombres[] = [];
   pacientes: UsuarioDTO[] = [];
   especialistas: UsuarioDTO[] = [];
   cargando = false;
@@ -53,12 +56,19 @@ export class TurnosAdminComponent implements OnInit {
   // Filtros
   filtroTexto: string = '';
 
+  get opcionesFiltro() {
+    return {
+      buscarEnHistoriaClinica: false,
+      campos: ['especialidad', 'paciente', 'especialista'] as const
+    };
+  }
+
   constructor(
     private turnosService: TurnosService,
     private usuariosService: UsuariosService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.cargarDatos();
@@ -84,7 +94,6 @@ export class TurnosAdminComponent implements OnInit {
       // Ordenar por fecha (más recientes primero)
       this.turnos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
-      this.aplicarFiltros();
     } catch (error) {
       console.error('Error al cargar datos:', error);
       this.snackBar.open('Error al cargar los turnos', 'Cerrar', {
@@ -107,32 +116,9 @@ export class TurnosAdminComponent implements OnInit {
     };
   }
 
-  aplicarFiltros() {
-    const filtro = this.filtroTexto.toLowerCase().trim();
-
-    if (!filtro) {
-      this.turnosFiltrados = [...this.turnos];
-      return;
-    }
-
-    this.turnosFiltrados = this.turnos.filter(turno => {
-      const especialidad = (turno.especialidad || '').toLowerCase();
-      const nombreEspecialista = (turno.nombreEspecialista || '').toLowerCase();
-      const nombrePaciente = (turno.nombrePaciente || '').toLowerCase();
-
-      return especialidad.includes(filtro) ||
-             nombreEspecialista.includes(filtro) ||
-             nombrePaciente.includes(filtro);
-    });
-  }
-
-  onFiltroChange() {
-    this.aplicarFiltros();
-  }
-
+  // Métodos de filtrado removidos - ahora se usa FiltroTurnosPipe en el template
   limpiarFiltros() {
     this.filtroTexto = '';
-    this.aplicarFiltros();
   }
 
   puedeCancelar(turno: TurnoDTO): boolean {
@@ -191,38 +177,7 @@ export class TurnosAdminComponent implements OnInit {
     });
   }
 
-  getEstadoClass(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'estado-pendiente';
-      case 'aceptado': return 'estado-aceptado';
-      case 'realizado': return 'estado-realizado';
-      case 'cancelado': return 'estado-cancelado';
-      case 'rechazado': return 'estado-rechazado';
-      default: return '';
-    }
-  }
-
-  getEstadoIcon(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'schedule';
-      case 'aceptado': return 'check_circle';
-      case 'realizado': return 'done_all';
-      case 'cancelado': return 'cancel';
-      case 'rechazado': return 'block';
-      default: return 'help';
-    }
-  }
-
-  getEstadoTexto(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'Pendiente';
-      case 'aceptado': return 'Aceptado';
-      case 'realizado': return 'Realizado';
-      case 'cancelado': return 'Cancelado';
-      case 'rechazado': return 'Rechazado';
-      default: return 'Desconocido';
-    }
-  }
+  // Métodos removidos - ahora se usa EstadoTurnoPipe
 }
 
 

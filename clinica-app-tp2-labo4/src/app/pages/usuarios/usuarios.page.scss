@@ -1,0 +1,88 @@
+.usuarios-container {
+  padding: 20px 30px;
+}
+
+.usuarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.usuario-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #333;
+  font-size: 0.95rem;
+  text-align: right;
+  flex: 1;
+  margin-left: 10px;
+}
+
+mat-card-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px !important;
+  
+  button {
+    flex: 1;
+  }
+}
+
+.no-usuarios {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+mat-chip {
+  &.habilitado {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+  
+  &.no-habilitado {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+}
+
+mat-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}
+

@@ -25,9 +25,14 @@ export const routes: Routes = [
                 //meter guard de admin
             },
             {
+                path: 'estadisticas',
+                loadComponent: () => import('./pages/estadisticas/estadisticas.component').then(m => m.EstadisticasComponent),
+                //meter guard de admin
+            },
+            {
                 path: 'login',
                 loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
-                 canDeactivate: [] //agregar guard para redirigir si ya esta logueado
+                canDeactivate: [] //agregar guard para redirigir si ya esta logueado
             },
             {
                 path: 'register',
@@ -45,7 +50,11 @@ export const routes: Routes = [
                 path: 'mi-perfil',
                 loadComponent: () => import('./pages/mi-perfil/mi-perfil.component').then(m => m.MiPerfilComponent),
             },
-            
+            {
+                path: 'pacientes',
+                loadComponent: () => import('./pages/pacientes/pacientes.component').then(m => m.PacientesComponent),
+            },
+
             {
                 path: '',
                 redirectTo: 'home',

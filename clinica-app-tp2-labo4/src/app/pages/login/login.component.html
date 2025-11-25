@@ -1,5 +1,10 @@
+<div class="welcome-bg"></div>
+
 <div class="login-container">
     <div class="login-container-body">
+      <div class="logo-container">
+        <img src="./assets/farmacia.png" alt="Clínica Online" />
+      </div>
       <h3>Inicio de sesion</h3>
   
         <form [formGroup]="loginForm" (ngSubmit)="login()">
@@ -20,9 +25,35 @@
         <div class="register-link-container">
             ¿No tenes una cuenta?<a routerLink="../register" class="register-link"> Registrate</a>
         </div>
-    
-        <div >
-            <a mat-raised-button color="secondary"  class="register-link" (click)="accesoRapido()">Acceso Rápido</a>
-        </div>
+    </div>
+
+    <!-- FAB Button y lista de usuarios -->
+    <div class="fab-container">
+        <button 
+            mat-fab 
+            color="primary" 
+            class="fab-main"
+            (click)="toggleUsuarios()"
+            [attr.aria-label]="mostrarUsuarios() ? 'Cerrar usuarios' : 'Mostrar usuarios'">
+            <mat-icon>{{ mostrarUsuarios() ? 'close' : 'person' }}</mat-icon>
+        </button>
+
+        @if (mostrarUsuarios()) {
+            <div class="usuarios-list">
+                @for (usuario of usuarios; track usuario.email; let i = $index) {
+                    <button
+                        mat-fab
+                        [color]="usuario.tipo === 'admin' ? 'primary' : usuario.tipo === 'especialista' ? 'accent' : 'warn'"
+                        class="fab-user"
+                        [style.bottom]="(usuarios.length - i) * 70 + 'px'"
+                        [style.animation-delay]="(i * 0.05) + 's'"
+                        (click)="seleccionarUsuario(usuario)"
+                        [attr.aria-label]="usuario.nombre"
+                        animate.enter="fab-enter">
+                        <img [src]="usuario.imagen" [alt]="usuario.nombre" />
+                    </button>
+                }
+            </div>
+        }
     </div>
 </div>

@@ -1,0 +1,219 @@
+.pacientes-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-card {
+  margin-bottom: 2rem;
+
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.8rem;
+      color: #4caf50;
+
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+
+  p {
+    color: #6c757d;
+  }
+}
+
+.no-pacientes {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 1rem 0 0;
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #adb5bd;
+    margin-top: 0.5rem;
+  }
+}
+
+.pacientes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.paciente-card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4caf50;
+      font-size: 1.2rem;
+
+      mat-icon {
+        color: #4caf50;
+      }
+    }
+
+    mat-card-subtitle {
+      margin-top: 0.5rem;
+      color: #6c757d;
+    }
+  }
+
+  .paciente-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #495057;
+
+      mat-icon {
+        color: #4caf50;
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+  }
+
+  .ultimos-turnos-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e9ecef;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #495057;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+
+      mat-icon {
+        color: #4caf50;
+      }
+    }
+
+    .turnos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .turno-item {
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 3px solid #4caf50;
+
+      .turno-fecha {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+        font-size: 0.9rem;
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+          color: #4caf50;
+        }
+      }
+
+      .turno-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .turno-especialidad {
+          font-weight: 600;
+          color: #212529;
+        }
+
+        .turno-estado {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 600;
+
+          &.estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+          }
+
+          &.estado-aceptado {
+            background: #d1ecf1;
+            color: #0c5460;
+          }
+
+          &.estado-realizado {
+            background: #d4edda;
+            color: #155724;
+          }
+
+          &.estado-cancelado,
+          &.estado-rechazado {
+            background: #f8d7da;
+            color: #721c24;
+          }
+        }
+      }
+    }
+
+    .sin-turnos {
+      text-align: center;
+      padding: 1rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+  }
+
+  mat-card-actions {
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+

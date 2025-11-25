@@ -1,0 +1,16 @@
+/* Animación de entrada para FAB buttons */
+.fab-enter {
+  animation: fab-slide-up 20s ease-in-out forwards;
+}
+@keyframes fab-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+

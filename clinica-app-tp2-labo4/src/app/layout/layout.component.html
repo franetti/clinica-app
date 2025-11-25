@@ -1,59 +1,62 @@
 <mat-sidenav-container class="layout-container">
 
-
     <mat-sidenav #sidenav mode="side" [(opened)]="opened">
       <mat-toolbar color="primary">Menú</mat-toolbar>
         <mat-nav-list>
             <ng-container *ngIf="userSession?.tipoUsuario === 'admin'; " >  
                       <a mat-list-item routerLink="/usuarios">
-                        <mat-icon>people</mat-icon>
                         Usuarios
                       </a>
                       <a mat-list-item routerLink="/turnos">
-                        <mat-icon>event_note</mat-icon>
                         Turnos
+                      </a>
+                      <a mat-list-item routerLink="/estadisticas">
+                        Estadísticas
                       </a>
             </ng-container>
             <!-- <a mat-list-item routerLink="/login">Login</a>
             <a mat-list-item routerLink="/registro">Registro</a> -->
             <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'admin'">
               <a mat-list-item routerLink="/solicitar-turno">
-                <mat-icon>add_circle</mat-icon>
                 Solicitar Turno
               </a>
             </ng-container>
             <ng-container *ngIf="userSession?.tipoUsuario === 'paciente' || userSession?.tipoUsuario === 'especialista'">
               <a mat-list-item routerLink="/mis-turnos">
-                <mat-icon>event</mat-icon>
                 Mis Turnos
               </a>
             </ng-container>
+            <ng-container *ngIf="userSession?.tipoUsuario === 'especialista'">
+              <a mat-list-item routerLink="/pacientes">
+                Mis Pacientes
+              </a>
+            </ng-container>
             <a mat-list-item routerLink="/mi-perfil">
-              <mat-icon>person</mat-icon>
               Mi Perfil
             </a>
             <a mat-list-item  (click)="logout()">Cerrar sesión</a>
         </mat-nav-list>
     </mat-sidenav>
   
-  <mat-sidenav-content>
+  <mat-sidenav-content [class.with-background]="shouldShowBackground" (click)="onSidenavContentClick($event)">
     <mat-toolbar color="primary" class="header mat-elevation-z4">
     @if (userSession) 
     {
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <button mat-icon-button (click)="toggleSidenav($event)">
         <mat-icon>menu</mat-icon>
       </button>
     }
     
-    <span class="titulo">Clínica Online</span>
+    <span class="titulo">Clínica Monte Grande</span>
     <span class="spacer"></span>
 
     <ng-container *ngIf="userSession; " >    
       <div style="gap:10px;display: flex;align-items: center;">
-        <span>{{ userSession.nombre }} {{ userSession.apellido }}</span>
-        <button mat-icon-button routerLink="/mi-perfil" matTooltip="Mi Perfil">
-          <mat-icon>account_circle</mat-icon>
-        </button>
+        
+        <span><img src="{{ userSession.imagen }}" alt="avatar" style="width: 30px; height: 30px; border-radius: 50%;"></span>
+        <span>{{ userSession.nombre }} {{ userSession.apellido }} - {{ userSession.tipoUsuario.toUpperCase()}}</span>
+       
+        
       </div>
     </ng-container>
   </mat-toolbar>

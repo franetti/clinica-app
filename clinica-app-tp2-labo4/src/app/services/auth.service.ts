@@ -6,35 +6,40 @@ import { UsuarioDTO } from '../models/usuario';
 //import { UserData } from '../models/user-data';/
 import { SupabaseService } from './supabase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { LogService } from './log.service';
 
 @Injectable({
-    providedIn: 'root',    
+    providedIn: 'root',
 })
-export class AuthService {       
-    private currentUser$ = new BehaviorSubject<UsuarioDTO | null>(null);    
-  
-    constructor(private router: Router, private supabaseService: SupabaseService, private snackBar: MatSnackBar)        
-    {
-      this.initSession(); // carga al iniciar
+export class AuthService {
+    private currentUser$ = new BehaviorSubject<UsuarioDTO | null>(null);
+
+    constructor(
+        private router: Router,
+        private supabaseService: SupabaseService,
+        private snackBar: MatSnackBar,
+        private logService: LogService
+    ) {
+        this.initSession(); // carga al iniciar
     }
-  
+
     private async initSession() {
         const { data } = await this.supabaseService.getClient().auth.getUser();
         let userData = await this.supabaseService.getClient().from('usuarios-datos')
-        .select('*')
-        .eq('id', data.user?.id)
-        .single();
-    
+            .select('*')
+            .eq('id', data.user?.id)
+            .single();
+
         let user: UsuarioDTO = userData.data as UsuarioDTO;
 
         this.currentUser$.next(user || null);
     }
-  
+
     getUser(): Observable<UsuarioDTO | null> {
-      return this.currentUser$.asObservable();
-    }  
-    
-    log(userId: string, accion: string) { 
+        return this.currentUser$.asObservable();
+    }
+
+    log(userId: string, accion: string) {
         this.supabaseService.getClient()
             .from('Logs')
             .insert([
@@ -44,18 +49,18 @@ export class AuthService {
                     console.error('Error al guardar el log:', error);
                 }
             })
-    }       
+    }
 
-    login(email: string, password: string) {    
+    login(email: string, password: string) {
         try {
             this.supabaseService.getClient().auth.signInWithPassword({
                 email: email,
-                password:password
-            }).then( async ({ data, error }) => {
+                password: password
+            }).then(async ({ data, error }) => {
                 // //TODO TOASTER  
                 if (error) {//
                     debugger
-                    if(error.message.includes('Invalid login credentials')) {
+                    if (error.message.includes('Invalid login credentials')) {
                         this.snackBar.open('Credenciales invalidas', 'Cerrar', {
                             duration: 3000,
                             horizontalPosition: 'right',
@@ -72,25 +77,25 @@ export class AuthService {
                             panelClass: ['snack-error']
                         });
                         return
-                    }                                               
+                    }
                     console.error('Error:', error.message);
                     this.snackBar.open('Ocurrió un error', 'Cerrar', {
                         duration: 3000,
                         horizontalPosition: 'right',
                         verticalPosition: 'bottom'
                     });
-                    
-                } else {   
-                    
+
+                } else {
+
                     await this.getUserData(data.user!.id).then((data) => {
                         if (data != null) {
-                            this.currentUser$.next(data);   
+                            this.currentUser$.next(data);
                         }
                     });
-                    
+
                     let habilitado = this.esUsuarioHabilitado(this.currentUser$.value!);
 
-                    if(!habilitado) {
+                    if (!habilitado) {
                         this.snackBar.open('Usuario no habilitado', 'Cerrar', {
                             duration: 3000,
                             horizontalPosition: 'right',
@@ -102,47 +107,74 @@ export class AuthService {
                         return;
                     }
                     else {
+                        // Registrar log de login
+                        const user = this.currentUser$.value;
+                        if (user && data.user) {
+                            this.logService.registrarLog(data.user.id, 'login').catch(err => {
+                                console.error('Error al registrar log de login:', err);
+                            });
+                        }
+
                         this.snackBar.open('Sesión iniciada', 'Cerrar', {
                             duration: 3000,
                             horizontalPosition: 'right',
                             verticalPosition: 'bottom',
                             panelClass: ['snack-exito']
                         });
-                        this.router.navigate(['/home']);
-                    }                
+
+                        // Redirigir según el tipo de usuario
+                        if (user) {
+                            switch (user.tipoUsuario) {
+                                case 'paciente':
+                                    this.router.navigate(['/mis-turnos']);
+                                    break;
+                                case 'especialista':
+                                    this.router.navigate(['/pacientes']);
+                                    break;
+                                case 'admin':
+                                    this.router.navigate(['/turnos']);
+                                    break;
+                                default:
+                                    this.router.navigate(['/home']);
+                                    break;
+                            }
+                        } else {
+                            this.router.navigate(['/home']);
+                        }
+                    }
                 }
-            });   
-        }          
+            });
+        }
         catch (error) {
             console.error('Error:', error);
         }
     }
 
-    async getUserData(uuid:any): Promise<UsuarioDTO> {
+    async getUserData(uuid: any): Promise<UsuarioDTO> {
         let userData = await this.supabaseService.getClient().from('usuarios-datos')
             .select('*')
             .eq('id', uuid)
             .single();
-        
+
         let user: UsuarioDTO = userData.data as UsuarioDTO;
 
-        return user;  
+        return user;
     }
 
-    esUsuarioHabilitado(user:UsuarioDTO): boolean {
-        if (user && user.tipoUsuario != 'paciente' && user.tipoUsuario != 'admin' && user.habilitado === false) { 
+    esUsuarioHabilitado(user: UsuarioDTO): boolean {
+        if (user && user.tipoUsuario != 'paciente' && user.tipoUsuario != 'admin' && user.habilitado === false) {
             return false;
-        }               
-        return true;                 
+        }
+        return true;
     }
 
-    async logout(): Promise<void> {                
-        await this.supabaseService.getClient().auth.signOut()        
+    async logout(): Promise<void> {
+        await this.supabaseService.getClient().auth.signOut()
         this.log(this.currentUser$.value?.id!, "Logout");
-        this.currentUser$.next(null);            
+        this.currentUser$.next(null);
         this.router.navigate(['/home']);
         //this.toastr.success("", 'Sesión cerrada correctamente');
-    }            
+    }
 
     async registrarUsuario(datos: UsuarioDTO) {
         try {
@@ -150,7 +182,7 @@ export class AuthService {
                 email: datos.email,
                 password: datos.password,
             });
-    
+
             if (error) {
                 console.error('Error:', error.message);
                 if (error.message.includes('User already registered')) {
@@ -168,9 +200,9 @@ export class AuthService {
                 }
                 return;
             }
-    
+
             console.log('User registered:', data.user);
-            await this.saveUserData(data.user!, datos);    
+            await this.saveUserData(data.user!, datos);
         } catch (err) {
             console.error('Error al registrar:', err);
             throw err;
@@ -187,7 +219,7 @@ export class AuthService {
                 img1 = urlImg;
             }
         }
-    
+
         if (datos.imagen2) {
             const urlImg2 = await this.saveFile(datos.imagen2);
             if (urlImg2) {
@@ -197,7 +229,7 @@ export class AuthService {
 
         this.supabaseService.getClient().from('usuarios-datos').insert([
             {
-                id: user.id, 
+                id: user.id,
                 nombre: datos.nombre,
                 apellido: datos.apellido,
                 edad: datos.edad,
@@ -207,7 +239,7 @@ export class AuthService {
                 imagen: img1,
                 imagen2: img2,
                 obraSocial: datos.obraSocial || null,
-                especialidad: datos.especialidad || null                
+                especialidad: datos.especialidad || null
             }
         ]).then(({ data, error }) => {
             if (error) {
@@ -217,17 +249,17 @@ export class AuthService {
                     horizontalPosition: 'right',
                     verticalPosition: 'bottom'
                 });
-            } 
-        });            
+            }
+        });
     }
-      
+
     async saveFile(img: File | string | null | undefined) {
         if (!img) return null;
         img = img as File;
         const ahora = new Date();
         const fechaConMilis = ahora.toISOString();
         const filename = `${fechaConMilis}-${img.name}`;
-        
+
         const { data, error } = await this.supabaseService.getClient()
             .storage
             .from('imagenes')
@@ -237,14 +269,14 @@ export class AuthService {
             });
         if (error) console.error('Error subiendo imagen:', error.message);
 
-            // Obtener public link
+        // Obtener public link
         const { data: publicData } = this.supabaseService.getClient()
             .storage
             .from('imagenes')
             .getPublicUrl(`users/${filename}`);
-        
-        
-                // El enlace público está acá
+
+
+        // El enlace público está acá
         const publicUrl = publicData.publicUrl;
 
         return publicUrl;

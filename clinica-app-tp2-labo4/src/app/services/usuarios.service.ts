@@ -11,7 +11,7 @@ import { from, Observable } from 'rxjs';
 export class UsuariosService {
   private table = 'usuarios-datos';
 
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(private supabaseService: SupabaseService) { }
 
   // Obtener todos los usuarios
   getAll(): Observable<UsuarioDTO[]> {
@@ -65,15 +65,27 @@ export class UsuariosService {
       .from(this.table)
       .delete()
       .eq('id', id)
-    ).pipe(map(() => {}));
+    ).pipe(map(() => { }));
   }
 
   // Habilitar / deshabilitar especialista
-  toggleHabilitado(usuario: UsuarioDTO): Observable<UsuarioDTO | null>{
+  toggleHabilitado(usuario: UsuarioDTO): Observable<UsuarioDTO | null> {
     return from(this.supabaseService.getClient()
       .from(this.table)
       .update({ habilitado: !usuario.habilitado })
       .eq('id', usuario.id)
     ).pipe(map(res => (res.data && res.data[0]) || null));
+  }
+
+  // Verificar si un email ya existe
+  verificarEmailExiste(email: string): Observable<boolean> {
+    return from(this.supabaseService.getClient()
+      .from(this.table)
+      .select('email')
+      .eq('email', email)
+      .maybeSingle()
+    ).pipe(
+      map(res => res.data !== null)
+    );
   }
 }

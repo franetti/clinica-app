@@ -4,6 +4,7 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TurnoDTO } from '../../../services/turnos.service';
+import { EstadoTurnoPipe } from '../../../pipes/estado-turno.pipe';
 
 interface TurnoConNombres extends TurnoDTO {
   nombreEspecialista?: string;
@@ -17,11 +18,11 @@ interface TurnoConNombres extends TurnoDTO {
     CommonModule,
     MatDialogModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    EstadoTurnoPipe
   ],
   template: `
     <h2 mat-dialog-title>
-      <mat-icon>description</mat-icon>
       {{ data.rol === 'paciente' ? 'Reseña del Especialista' : 'Comentario del Turno' }}
     </h2>
     
@@ -31,12 +32,11 @@ interface TurnoConNombres extends TurnoDTO {
         <p *ngIf="data.rol === 'especialista'"><strong>Paciente:</strong> {{ data.turno.nombrePaciente }}</p>
         <p><strong>Especialidad:</strong> {{ data.turno.especialidad }}</p>
         <p><strong>Fecha:</strong> {{ formatearFecha(data.turno.fecha) }}</p>
-        <p><strong>Estado:</strong> <span [class]="getEstadoClass()">{{ getEstadoTexto() }}</span></p>
+        <p><strong>Estado:</strong> <span [class]="data.turno.estadoTurno | estadoTurno:'clase'">{{ data.turno.estadoTurno | estadoTurno }}</span></p>
       </div>
 
       <div class="resenia-container">
         <h3>
-          <mat-icon>comment</mat-icon>
           {{ data.turno.comentario ? 'Comentario:' : 'Reseña:' }}
         </h3>
         <div class="resenia-content">
@@ -46,7 +46,6 @@ interface TurnoConNombres extends TurnoDTO {
 
       <div *ngIf="data.turno.calificacion" class="calificacion-container">
         <h3>
-          <mat-icon>star</mat-icon>
           Calificación del Paciente:
         </h3>
         <div class="estrellas">
@@ -60,7 +59,6 @@ interface TurnoConNombres extends TurnoDTO {
     
     <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" (click)="onCerrar()">
-        <mat-icon>close</mat-icon>
         Cerrar
       </button>
     </mat-dialog-actions>
@@ -160,7 +158,7 @@ export class VerReseniaDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<VerReseniaDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { turno: TurnoConNombres, rol: 'paciente' | 'especialista' }
-  ) {}
+  ) { }
 
   onCerrar(): void {
     this.dialogRef.close();
@@ -178,20 +176,7 @@ export class VerReseniaDialogComponent {
     });
   }
 
-  getEstadoClass(): string {
-    return `estado-${this.data.turno.estadoTurno || 'pendiente'}`;
-  }
-
-  getEstadoTexto(): string {
-    const estados: any = {
-      'pendiente': 'Pendiente',
-      'aceptado': 'Aceptado',
-      'realizado': 'Realizado',
-      'cancelado': 'Cancelado',
-      'rechazado': 'Rechazado'
-    };
-    return estados[this.data.turno.estadoTurno || 'pendiente'];
-  }
+  // Métodos removidos - ahora se usa EstadoTurnoPipe
 
   getEstrellas(): boolean[] {
     const calificacion = this.data.turno.calificacion || 0;

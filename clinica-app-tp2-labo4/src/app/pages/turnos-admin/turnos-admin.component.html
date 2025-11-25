@@ -26,7 +26,6 @@
             <input
               matInput
               [(ngModel)]="filtroTexto"
-              (ngModelChange)="onFiltroChange()"
               placeholder="Ej: Cardiología, Dr. García, Juan Pérez...">
             <mat-icon matPrefix>search</mat-icon>
             <button
@@ -38,11 +37,6 @@
               <mat-icon>clear</mat-icon>
             </button>
           </mat-form-field>
-
-          <div class="filtro-info">
-            <mat-icon>info</mat-icon>
-            <span>Mostrando {{ turnosFiltrados.length }} de {{ turnos.length }} turnos</span>
-          </div>
         </div>
       </div>
     </mat-card-content>
@@ -61,8 +55,8 @@
   </mat-card>
 
   <!-- Lista de turnos -->
-  <div *ngIf="!cargando && turnosFiltrados.length > 0" class="turnos-list">
-    <mat-card *ngFor="let turno of turnosFiltrados" class="turno-card" [class.turno-cancelado]="turno.estadoTurno === 'cancelado'">
+  <div *ngIf="!cargando && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length > 0" class="turnos-list">
+    <mat-card *ngFor="let turno of turnos | filtroTurnos:filtroTexto:opcionesFiltro" class="turno-card" [class.turno-cancelado]="turno.estadoTurno === 'cancelado'">
       <mat-card-content>
         <div class="turno-content">
           <!-- Info principal -->
@@ -105,9 +99,9 @@
 
           <!-- Estado -->
           <div class="turno-estado">
-            <mat-chip [class]="getEstadoClass(turno.estadoTurno)">
-              <mat-icon>{{ getEstadoIcon(turno.estadoTurno) }}</mat-icon>
-              {{ getEstadoTexto(turno.estadoTurno) }}
+            <mat-chip [class]="turno.estadoTurno | estadoTurno:'clase'">
+              <mat-icon>{{ turno.estadoTurno | estadoTurno:'icono' }}</mat-icon>
+              {{ turno.estadoTurno | estadoTurno }}
             </mat-chip>
           </div>
 
@@ -130,12 +124,7 @@
               matTooltip="Cancelar turno">
               <mat-icon>cancel</mat-icon>
               Cancelar Turno
-            </button>
-            
-            <span *ngIf="!puedeCancelar(turno)" class="no-cancelable">
-              <mat-icon>info</mat-icon>
-              No se puede cancelar
-            </span>
+            </button>                     
           </div>
         </div>
       </mat-card-content>
@@ -143,7 +132,7 @@
   </div>
 
   <!-- Sin resultados de filtro -->
-  <mat-card *ngIf="!cargando && turnos.length > 0 && turnosFiltrados.length === 0" class="no-resultados">
+  <mat-card *ngIf="!cargando && turnos.length > 0 && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length === 0" class="no-resultados">
     <mat-icon>search_off</mat-icon>
     <p>No se encontraron turnos con el filtro aplicado</p>
     <button mat-raised-button color="primary" (click)="limpiarFiltros()">

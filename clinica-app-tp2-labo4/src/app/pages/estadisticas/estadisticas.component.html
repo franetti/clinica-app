@@ -1,0 +1,139 @@
+<div class="estadisticas-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>bar_chart</mat-icon>
+        Estadísticas y Reportes
+      </mat-card-title>
+      <mat-card-subtitle>
+        Informes y gráficos del sistema
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <!-- Filtro de fechas -->
+  <mat-card class="filtros-card" *ngIf="!cargando">
+    <mat-card-content>
+      <h3>Filtrar por Rango de Fechas (para gráficos de turnos)</h3>
+      <div class="filtros-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Inicio</mat-label>
+          <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="fechaInicio">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicio></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Fin</mat-label>
+          <input matInput [matDatepicker]="pickerFin" [(ngModel)]="fechaFin">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="aplicarFiltroFechas()">
+          <mat-icon>filter_list</mat-icon>
+          Aplicar Filtro
+        </button>
+
+        <button mat-raised-button (click)="limpiarFiltroFechas()">
+          <mat-icon>clear</mat-icon>
+          Limpiar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Gráficos -->
+  <div *ngIf="!cargando" class="graficos-grid">
+    <!-- Gráfico 1: Log de Ingresos -->
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Log de Ingresos al Sistema</mat-card-title>
+        <button mat-icon-button (click)="descargarExcelLogs()" matTooltip="Descargar Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas baseChart
+          [type]="logIngresosChartType"
+          [data]="logIngresosChartData"
+          [options]="logIngresosChartOptions">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Gráfico 2: Turnos por Especialidad -->
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Turnos por Especialidad</mat-card-title>
+        <button mat-icon-button (click)="descargarExcelTurnosEspecialidad()" matTooltip="Descargar Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas baseChart
+          [type]="turnosEspecialidadChartType"
+          [data]="turnosEspecialidadChartData"
+          [options]="turnosEspecialidadChartOptions">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Gráfico 3: Turnos por Día -->
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Turnos por Día</mat-card-title>
+        <button mat-icon-button (click)="descargarExcelTurnosDia()" matTooltip="Descargar Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas baseChart
+          [type]="turnosDiaChartType"
+          [data]="turnosDiaChartData"
+          [options]="turnosDiaChartOptions">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Gráfico 4: Turnos Solicitados por Médico -->
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Turnos Solicitados por Médico</mat-card-title>
+        <button mat-icon-button (click)="descargarExcelTurnosSolicitados()" matTooltip="Descargar Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas baseChart
+          [type]="turnosSolicitadosChartType"
+          [data]="turnosSolicitadosChartData"
+          [options]="turnosSolicitadosChartOptions">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Gráfico 5: Turnos Finalizados por Médico -->
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Turnos Finalizados por Médico</mat-card-title>
+        <button mat-icon-button (click)="descargarExcelTurnosFinalizados()" matTooltip="Descargar Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas baseChart
+          [type]="turnosFinalizadosChartType"
+          [data]="turnosFinalizadosChartData"
+          [options]="turnosFinalizadosChartOptions">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

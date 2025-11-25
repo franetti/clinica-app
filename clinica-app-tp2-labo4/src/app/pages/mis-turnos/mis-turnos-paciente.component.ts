@@ -14,8 +14,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TurnosService, TurnoDTO, EstadoTurno } from '../../services/turnos.service';
 import { UsuariosService } from '../../services/usuarios.service';
 import { UsuarioDTO } from '../../models/usuario';
-import { 
-  CancelarTurnoDialogComponent 
+import { HistoriaClinicaService, HistoriaClinicaDTO } from '../../services/historia-clinica.service';
+import { EstadoTurnoPipe } from '../../pipes/estado-turno.pipe';
+import { FiltroTurnosPipe } from '../../pipes/filtro-turnos.pipe';
+import {
+  CancelarTurnoDialogComponent
 } from './dialogs/cancelar-turno-dialog.component';
 import {
   VerReseniaDialogComponent
@@ -46,28 +49,39 @@ interface TurnoConNombres extends TurnoDTO {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    EstadoTurnoPipe,
+    FiltroTurnosPipe
   ],
   templateUrl: './mis-turnos-paciente.component.html',
   styleUrls: ['./mis-turnos.component.scss']
 })
 export class MisTurnosPacienteComponent implements OnInit {
   @Input() idUsuario: string = "";
-  
+
   turnos: TurnoConNombres[] = [];
-  turnosFiltrados: TurnoConNombres[] = [];
   especialistas: UsuarioDTO[] = [];
   cargando = false;
-  
+
   // Filtro
   filtroTexto: string = '';
+  historiasClinicas: Map<string, HistoriaClinicaDTO[]> = new Map();
+
+  get opcionesFiltro() {
+    return {
+      buscarEnHistoriaClinica: true,
+      historiasClinicas: this.historiasClinicas,
+      campos: ['especialidad', 'especialista'] as const
+    };
+  }
 
   constructor(
     private turnosService: TurnosService,
     private usuariosService: UsuariosService,
+    private historiaClinicaService: HistoriaClinicaService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   async ngOnInit() {
     if (this.idUsuario) {
@@ -85,11 +99,13 @@ export class MisTurnosPacienteComponent implements OnInit {
 
       this.especialistas = especialistas || [];
       this.turnos = turnos.map(t => this.enriquecerTurnoConNombres(t));
-      
+
+      // Cargar historias clínicas para los turnos realizados
+      await this.cargarHistoriasClinicas();
+
       // Ordenar por fecha (más recientes primero)
       this.turnos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-      
-      this.aplicarFiltros();
+
     } catch (error) {
       console.error('Error al cargar turnos:', error);
       this.snackBar.open('Error al cargar los turnos', 'Cerrar', {
@@ -100,6 +116,27 @@ export class MisTurnosPacienteComponent implements OnInit {
     }
   }
 
+  async cargarHistoriasClinicas() {
+    try {
+      const historias = await this.historiaClinicaService.obtenerHistoriaClinicaPaciente(this.idUsuario);
+
+      // Agrupar historias por turno (basado en fecha y especialista)
+      this.turnos.forEach(turno => {
+        if (turno.estadoTurno === 'realizado' && turno.paciente) {
+          const historiasTurno = historias.filter(h =>
+            h.idPaciente === turno.paciente &&
+            h.idEspecialista === turno.especialista
+          );
+          this.historiasClinicas.set(turno.id, historiasTurno);
+        }
+      });
+    } catch (error) {
+      console.error('Error al cargar historias clínicas:', error);
+    }
+  }
+
+  // Método removido - ahora se usa FiltroTurnosPipe
+
   enriquecerTurnoConNombres(turno: TurnoDTO): TurnoConNombres {
     const especialista = this.especialistas.find(e => e.id === turno.especialista);
     return {
@@ -108,29 +145,9 @@ export class MisTurnosPacienteComponent implements OnInit {
     };
   }
 
-  aplicarFiltros() {
-    const filtro = this.filtroTexto.toLowerCase().trim();
-
-    if (!filtro) {
-      this.turnosFiltrados = [...this.turnos];
-      return;
-    }
-
-    this.turnosFiltrados = this.turnos.filter(turno => {
-      const especialidad = (turno.especialidad || '').toLowerCase();
-      const nombreEspecialista = (turno.nombreEspecialista || '').toLowerCase();
-      
-      return especialidad.includes(filtro) || nombreEspecialista.includes(filtro);
-    });
-  }
-
-  onFiltroChange() {
-    this.aplicarFiltros();
-  }
-
+  // Métodos de filtrado removidos - ahora se usa FiltroTurnosPipe en el template
   limpiarFiltros() {
     this.filtroTexto = '';
-    this.aplicarFiltros();
   }
 
   // Validaciones de acciones
@@ -260,36 +277,5 @@ export class MisTurnosPacienteComponent implements OnInit {
     });
   }
 
-  getEstadoClass(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'estado-pendiente';
-      case 'aceptado': return 'estado-aceptado';
-      case 'realizado': return 'estado-realizado';
-      case 'cancelado': return 'estado-cancelado';
-      case 'rechazado': return 'estado-rechazado';
-      default: return '';
-    }
-  }
-
-  getEstadoIcon(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'schedule';
-      case 'aceptado': return 'check_circle';
-      case 'realizado': return 'done_all';
-      case 'cancelado': return 'cancel';
-      case 'rechazado': return 'block';
-      default: return 'help';
-    }
-  }
-
-  getEstadoTexto(estado?: EstadoTurno): string {
-    switch (estado) {
-      case 'pendiente': return 'Pendiente';
-      case 'aceptado': return 'Aceptado';
-      case 'realizado': return 'Realizado';
-      case 'cancelado': return 'Cancelado';
-      case 'rechazado': return 'Rechazado';
-      default: return 'Desconocido';
-    }
-  }
+  // Métodos removidos - ahora se usa EstadoTurnoPipe
 }

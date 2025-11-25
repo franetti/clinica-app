@@ -48,8 +48,6 @@ interface TurnoConNombres extends TurnoDTO {
           placeholder="Ingrese el motivo por el cual se cancela el turno..."
           required>
         </textarea>
-        <mat-icon matPrefix>comment</mat-icon>
-        <mat-hint>Este comentario quedará registrado en el turno</mat-hint>
       </mat-form-field>
     </mat-dialog-content>
     

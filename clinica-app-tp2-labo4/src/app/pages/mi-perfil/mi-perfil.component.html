@@ -4,7 +4,6 @@
     <mat-card class="perfil-card">
       <mat-card-header>
         <mat-card-title>
-          <mat-icon>person</mat-icon>
           Mi Perfil
         </mat-card-title>
       </mat-card-header>
@@ -16,15 +15,11 @@
             <div class="imagen-principal" *ngIf="usuario.imagen">
               <img [src]="usuario.imagen" alt="Foto de perfil" />
             </div>
-            <div class="imagen-secundaria" *ngIf="usuario.imagen2">
-              <img [src]="usuario.imagen2" alt="Segunda foto" />
-            </div>
           </div>
 
           <!-- Datos personales -->
           <div class="datos-personales">
             <div class="dato-item">
-              <mat-icon>badge</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Nombre completo</span>
                 <span class="dato-value">{{ usuario.nombre }} {{ usuario.apellido }}</span>
@@ -32,7 +27,6 @@
             </div>
 
             <div class="dato-item">
-              <mat-icon>email</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Email</span>
                 <span class="dato-value">{{ usuario.email }}</span>
@@ -40,15 +34,13 @@
             </div>
 
             <div class="dato-item">
-              <mat-icon>credit_card</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">DNI</span>
-                <span class="dato-value">{{ usuario.dni }}</span>
+                <span class="dato-value">{{ usuario.dni | dniFormato:'conPuntos' }}</span>
               </div>
             </div>
 
             <div class="dato-item">
-              <mat-icon>cake</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Edad</span>
                 <span class="dato-value">{{ usuario.edad }} años</span>
@@ -56,7 +48,6 @@
             </div>
 
             <div class="dato-item">
-              <mat-icon>assignment_ind</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Tipo de usuario</span>
                 <span class="dato-value tipo-usuario">{{ usuario.tipoUsuario }}</span>
@@ -64,7 +55,6 @@
             </div>
 
             <div class="dato-item" *ngIf="usuario.obraSocial">
-              <mat-icon>local_hospital</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Obra Social</span>
                 <span class="dato-value">{{ usuario.obraSocial }}</span>
@@ -72,7 +62,6 @@
             </div>
 
             <div class="dato-item" *ngIf="usuario.especialidad">
-              <mat-icon>medical_services</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Especialidad(es)</span>
                 <div class="especialidades-chips">
@@ -84,7 +73,6 @@
             </div>
 
             <div class="dato-item" *ngIf="usuario.tipoUsuario === 'especialista'">
-              <mat-icon>{{ usuario.habilitado ? 'check_circle' : 'cancel' }}</mat-icon>
               <div class="dato-content">
                 <span class="dato-label">Estado</span>
                 <span class="dato-value" [class.habilitado]="usuario.habilitado" [class.no-habilitado]="!usuario.habilitado">
@@ -101,7 +89,6 @@
     <mat-card class="horarios-card" *ngIf="esEspecialista()">
       <mat-card-header>
         <mat-card-title>
-          <mat-icon>schedule</mat-icon>
           Mis Horarios
         </mat-card-title>
         <mat-card-subtitle>
@@ -115,7 +102,6 @@
           <h3>Configurar días y horarios de trabajo</h3>
 
           <div class="info-hint">
-            <mat-icon>info</mat-icon>
             <p>
               Configure los días de la semana y el horario de atención para cada especialidad. 
               Los turnos se generarán automáticamente cada 30 minutos dentro del rango horario seleccionado.
@@ -131,7 +117,6 @@
                   {{ esp }}
                 </mat-option>
               </mat-select>
-              <mat-icon matPrefix>medical_services</mat-icon>
             </mat-form-field>
           </div>
 
@@ -144,7 +129,6 @@
                 color="primary"
                 (click)="seleccionarTodosLosDias()"
                 class="btn-seleccionar-todos">
-                <mat-icon>{{ todosDiasMarcados() ? 'deselect' : 'select_all' }}</mat-icon>
                 {{ todosDiasMarcados() ? 'Deseleccionar' : 'Seleccionar' }} todos
               </button>
             </div>
@@ -157,8 +141,6 @@
                 (click)="toggleDia(dia.numero)"
                 class="dia-btn"
                 [class.seleccionado]="isDiaSeleccionado(dia.numero)">
-                <mat-icon *ngIf="isDiaSeleccionado(dia.numero)">check_circle</mat-icon>
-                <mat-icon *ngIf="!isDiaSeleccionado(dia.numero)">radio_button_unchecked</mat-icon>
                 <span class="dia-nombre">{{ dia.nombre }}</span>
               </button>
             </div>
@@ -175,7 +157,6 @@
                       {{ hora.texto }}
                     </mat-option>
                   </mat-select>
-                  <mat-icon matPrefix>access_time</mat-icon>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
@@ -185,17 +166,12 @@
                       {{ hora.texto }}
                     </mat-option>
                   </mat-select>
-                  <mat-icon matPrefix>access_time</mat-icon>
                 </mat-form-field>
               </div>
 
               <div class="horario-info-card">
-                <mat-icon>info</mat-icon>
                 <div>
-                  <p><strong>Turnos cada 30 minutos</strong></p>
-                  <p class="subtitle" *ngIf="horaInicio && horaFin && horaFin > horaInicio">
-                    {{ calcularTurnosPorDia() }} turnos disponibles por día
-                  </p>
+                  <p><strong>Turnos cada 30 minutos</strong></p>                  
                 </div>
               </div>
             </div>
@@ -209,7 +185,6 @@
                 color="primary" 
                 (click)="guardarHorarios()"
                 [disabled]="diasSeleccionados.length === 0 || cargando">
-                <mat-icon>save</mat-icon>
                 Guardar configuración
               </button>
             </div>
@@ -221,7 +196,6 @@
         <!-- Lista de horarios configurados -->
         <div class="horarios-existentes-section">
           <h3>
-            <mat-icon>event_available</mat-icon>
             Configuraciones de horarios
           </h3>
 
@@ -231,7 +205,6 @@
           </div>
 
           <div *ngIf="!cargando && horariosExistentes.length === 0" class="no-horarios">
-            <mat-icon>event_busy</mat-icon>
             <p>No hay horarios configurados aún</p>
             <p class="subtitle">Configure sus días de trabajo usando el formulario superior</p>
           </div>
@@ -241,17 +214,14 @@
               <mat-card-content>
                 <div class="horario-info">
                   <div class="horario-especialidad">
-                    <mat-icon>medical_services</mat-icon>
                     <span class="especialidad-nombre">{{ horario.especialidad }}</span>
                   </div>
                   
                   <div class="horario-dias">
-                    <mat-icon>calendar_month</mat-icon>
                     <span>{{ obtenerDiasFormateados(horario.dias) }}</span>
                   </div>
 
                   <div class="horario-horas">
-                    <mat-icon>schedule</mat-icon>
                     <span>{{ obtenerHorarioFormateado(horario.horario) }}</span>
                   </div>
                 </div>
@@ -269,6 +239,116 @@
               </mat-card-content>
             </mat-card>
           </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sección de Historia Clínica (solo para pacientes) -->
+    <mat-card class="historia-clinica-card" *ngIf="esPaciente()">
+      <mat-card-header>
+        <mat-card-title>
+          Mi Historia Clínica
+        </mat-card-title>
+        <mat-card-subtitle>
+          Registro completo de atenciones y controles
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Selector de especialidad y botón de descarga -->
+        <div class="historia-clinica-controls" *ngIf="!cargando && historiaClinica.length > 0">
+          <mat-form-field appearance="outline" style="flex: 1; margin-right: 10px;">
+            <mat-label>Filtrar por Especialidad</mat-label>
+            <mat-select [(ngModel)]="especialidadSeleccionadaPDF" (selectionChange)="onEspecialidadPDFChange()">
+              <mat-option value="todas">Todas las especialidades</mat-option>
+              <mat-option *ngFor="let esp of especialidadesDisponibles" [value]="esp">
+                {{ esp }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="descargarPDFHistoriaClinica()"
+            [disabled]="descargandoPDF || historiaClinica.length === 0">
+            <mat-spinner *ngIf="descargandoPDF" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+            <span *ngIf="!descargandoPDF">Descargar PDF Historia</span>
+            <span *ngIf="descargandoPDF">Generando...</span>
+          </button>
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="descargarPDFTurnos()"
+            [disabled]="descargandoPDFTurnos || especialidadSeleccionadaPDF === 'todas' || turnosFiltradosPorEspecialidad().length === 0">
+            <mat-spinner *ngIf="descargandoPDFTurnos" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+            <span *ngIf="!descargandoPDFTurnos">Descargar PDF Turnos</span>
+            <span *ngIf="descargandoPDFTurnos">Generando...</span>
+          </button>
+        </div>
+        <div *ngIf="cargando" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando historia clínica...</p>
+        </div>
+
+        <div *ngIf="!cargando && historiaClinica.length === 0" class="no-historia">
+          <p>No hay registros de historia clínica aún</p>
+          <p class="subtitle">Los registros aparecerán aquí después de cada atención médica</p>
+        </div>
+
+        <div *ngIf="!cargando && historiaClinica.length > 0 && historiaClinicaFiltrada.length === 0" class="no-historia">
+          <p>No hay registros de historia clínica para la especialidad seleccionada</p>
+        </div>
+
+        <div *ngIf="!cargando && historiaClinicaFiltrada.length > 0" class="historia-list">
+          <mat-card *ngFor="let registro of historiaClinicaFiltrada" class="historia-item">
+            <mat-card-content>
+              <div class="historia-header">
+                <div class="historia-fecha">
+                  <span>{{ formatearFechaHistoria(registro.created_at) }}</span>
+                </div>
+              </div>
+
+              <div class="historia-datos">
+                <h4>Datos Fijos</h4>
+                <div class="datos-grid">
+                  <div class="dato-item" *ngIf="registro.altura">
+                    <div>
+                      <span class="dato-label">Altura</span>
+                      <span class="dato-value">{{ registro.altura | historiaClinicaFormato:'altura' }}</span>
+                    </div>
+                  </div>
+                  <div class="dato-item" *ngIf="registro.peso">
+                    <div>
+                      <span class="dato-label">Peso</span>
+                      <span class="dato-value">{{ registro.peso | historiaClinicaFormato:'peso' }}</span>
+                    </div>
+                  </div>
+                  <div class="dato-item" *ngIf="registro.temperatura">
+                    <div>
+                      <span class="dato-label">Temperatura</span>
+                      <span class="dato-value">{{ registro.temperatura | historiaClinicaFormato:'temperatura' }}</span>
+                    </div>
+                  </div>
+                  <div class="dato-item" *ngIf="registro.presion">
+                    <div>
+                      <span class="dato-label">Presión</span>
+                      <span class="dato-value">{{ registro.presion | historiaClinicaFormato:'presion' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="parsearDatosDinamicos(registro.dinamicos).length > 0" class="datos-dinamicos-section">
+                  <h4>Otros Datos</h4>
+                  <div class="dinamicos-list">
+                    <div *ngFor="let dato of parsearDatosDinamicos(registro.dinamicos)" class="dato-dinamico">
+                      <span class="dato-clave">{{ dato.clave }}:</span>
+                      <span class="dato-valor">{{ dato.valor }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
         </div>
       </mat-card-content>
     </mat-card>

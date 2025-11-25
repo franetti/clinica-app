@@ -29,8 +29,8 @@ interface TurnoConNombres extends TurnoDTO {
     MatCheckboxModule
   ],
   template: `
+  <div style="padding:15px">
     <h2 mat-dialog-title>
-      <mat-icon>assignment</mat-icon>
       Completar Encuesta
     </h2>
     
@@ -88,14 +88,12 @@ interface TurnoConNombres extends TurnoDTO {
             rows="3"
             placeholder="Puede dejar comentarios adicionales sobre su experiencia...">
           </textarea>
-          <mat-icon matPrefix>comment</mat-icon>
         </mat-form-field>
       </div>
     </mat-dialog-content>
     
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancelar()">
-        <mat-icon>close</mat-icon>
         Cancelar
       </button>
       <button
@@ -103,10 +101,10 @@ interface TurnoConNombres extends TurnoDTO {
         color="primary"
         [disabled]="!formularioCompleto()"
         (click)="onConfirmar()">
-        <mat-icon>send</mat-icon>
         Enviar Encuesta
       </button>
     </mat-dialog-actions>
+    </div>
   `,
   styles: [`
     h2 {
@@ -189,7 +187,7 @@ export class CompletarEncuestaDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<CompletarEncuestaDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { turno: TurnoConNombres }
-  ) {}
+  ) { }
 
   onCancelar(): void {
     this.dialogRef.close();
@@ -202,10 +200,10 @@ export class CompletarEncuestaDialogComponent {
   }
 
   formularioCompleto(): boolean {
-    return !!(this.respuestas.puntualidad && 
-              this.respuestas.atencion && 
-              this.respuestas.claridad && 
-              this.respuestas.recomendaria);
+    return !!(this.respuestas.puntualidad &&
+      this.respuestas.atencion &&
+      this.respuestas.claridad &&
+      this.respuestas.recomendaria);
   }
 
   formatearFecha(fechaStr: string): string {

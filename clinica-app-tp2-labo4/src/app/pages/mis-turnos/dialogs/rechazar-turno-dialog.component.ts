@@ -25,8 +25,8 @@ interface TurnoConNombres extends TurnoDTO {
     MatIconModule
   ],
   template: `
+  <div style='padding:15px;'>
     <h2 mat-dialog-title>
-      <mat-icon>block</mat-icon>
       Rechazar Turno
     </h2>
     
@@ -46,14 +46,11 @@ interface TurnoConNombres extends TurnoDTO {
           placeholder="Ingrese el motivo por el cual rechaza el turno..."
           required>
         </textarea>
-        <mat-icon matPrefix>comment</mat-icon>
-        <mat-hint>Este comentario quedará registrado en el turno</mat-hint>
       </mat-form-field>
     </mat-dialog-content>
     
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancelar()">
-        <mat-icon>close</mat-icon>
         Volver
       </button>
       <button
@@ -61,10 +58,10 @@ interface TurnoConNombres extends TurnoDTO {
         color="warn"
         [disabled]="!comentario || comentario.trim().length < 10"
         (click)="onConfirmar()">
-        <mat-icon>block</mat-icon>
         Confirmar Rechazo
       </button>
     </mat-dialog-actions>
+    </div>
   `,
   styles: [`
     h2 {
@@ -118,7 +115,7 @@ export class RechazarTurnoDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<RechazarTurnoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { turno: TurnoConNombres }
-  ) {}
+  ) { }
 
   onCancelar(): void {
     this.dialogRef.close();

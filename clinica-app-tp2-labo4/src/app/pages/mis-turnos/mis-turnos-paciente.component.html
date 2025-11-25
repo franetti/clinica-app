@@ -2,7 +2,6 @@
   <mat-card class="header-card">
     <mat-card-header>
       <mat-card-title>
-        <mat-icon>event</mat-icon>
         Mis Turnos
       </mat-card-title>
       <mat-card-subtitle>
@@ -16,19 +15,16 @@
     <mat-card-content>
       <div class="filtros-container">
         <h3>
-          <mat-icon>filter_list</mat-icon>
           Filtrar Turnos
         </h3>
         
         <div class="filtro-row">
           <mat-form-field appearance="outline" class="filtro-input">
-            <mat-label>Buscar por Especialidad o Especialista</mat-label>
+            <mat-label>Buscar por Especialidad, Especialista o Historia Clínica</mat-label>
             <input
               matInput
               [(ngModel)]="filtroTexto"
-              (ngModelChange)="onFiltroChange()"
-              placeholder="Ej: Cardiología, Dr. García...">
-            <mat-icon matPrefix>search</mat-icon>
+              placeholder="Ej: Cardiología, Dr. García, altura, peso, caries...">
             <button
               mat-icon-button
               matSuffix
@@ -37,12 +33,7 @@
               matTooltip="Limpiar filtro">
               <mat-icon>clear</mat-icon>
             </button>
-          </mat-form-field>
-
-          <div class="filtro-info">
-            <mat-icon>info</mat-icon>
-            <span>Mostrando {{ turnosFiltrados.length }} de {{ turnos.length }} turnos</span>
-          </div>
+          </mat-form-field>          
         </div>
       </div>
     </mat-card-content>
@@ -55,32 +46,31 @@
   </div>
 
   <!-- Sin turnos -->
-  <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos">
-    <mat-icon>event_busy</mat-icon>
+  <mat-card *ngIf="!cargando && turnos.length === 0" class="no-turnos" style="display: flex; flex-direction: column; align-items: center;">
     <p>No tiene turnos solicitados</p>
-    <button mat-raised-button color="primary" routerLink="/solicitar-turno">
+    <!-- <button mat-raised-button color="primary" routerLink="/solicitar-turno">
       <mat-icon>add</mat-icon>
       Solicitar Turno
-    </button>
+    </button> -->
   </mat-card>
 
   <!-- Lista de turnos -->
-  <div *ngIf="!cargando && turnosFiltrados.length > 0" class="turnos-list">
-    <mat-card *ngFor="let turno of turnosFiltrados" class="turno-card">
+  <div *ngIf="!cargando && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length > 0" class="turnos-list">
+    <mat-card *ngFor="let turno of turnos | filtroTurnos:filtroTexto:opcionesFiltro" class="turno-card">
       <mat-card-content>
         <div class="turno-content">
           <!-- Header con estado -->
-          <div class="turno-header">
-            <mat-chip [class]="getEstadoClass(turno.estadoTurno)">
-              <mat-icon>{{ getEstadoIcon(turno.estadoTurno) }}</mat-icon>
-              {{ getEstadoTexto(turno.estadoTurno) }}
+       <div class="turno-header" >
+            <p style="font-weight: blod;font-size: 30px; margin: 0;">Estado: </p>
+            <mat-chip [class]="turno.estadoTurno | estadoTurno:'clase'" style="margin-left: 10px; font-size: 18px;display: flex; align-items: center; padding: 5px 10px;">
+              
+              <span style="font-weight: bold;">{{ turno.estadoTurno | estadoTurno }}</span>
             </mat-chip>
           </div>
 
           <!-- Info principal -->
           <div class="turno-info-principal">
             <div class="turno-fecha">
-              <mat-icon>calendar_today</mat-icon>
               <div>
                 <span class="info-label">Fecha y Hora</span>
                 <span class="info-valor">{{ formatearFecha(turno.fecha) }}</span>
@@ -88,7 +78,6 @@
             </div>
 
             <div class="turno-especialidad">
-              <mat-icon>medical_services</mat-icon>
               <div>
                 <span class="info-label">Especialidad</span>
                 <span class="info-valor">{{ turno.especialidad }}</span>
@@ -96,7 +85,6 @@
             </div>
 
             <div class="turno-especialista">
-              <mat-icon>local_hospital</mat-icon>
               <div>
                 <span class="info-label">Especialista</span>
                 <span class="info-valor">{{ turno.nombreEspecialista }}</span>
@@ -106,7 +94,6 @@
 
           <!-- Calificación si existe -->
           <div *ngIf="turno.calificacion" class="turno-calificacion">
-            <mat-icon>star</mat-icon>
             <span>Su calificación: {{ turno.calificacion }} estrellas</span>
           </div>
 
@@ -117,7 +104,6 @@
               mat-stroked-button
               color="warn"
               (click)="cancelarTurno(turno)">
-              <mat-icon>cancel</mat-icon>
               Cancelar
             </button>
 
@@ -126,7 +112,6 @@
               mat-stroked-button
               color="primary"
               (click)="verResenia(turno)">
-              <mat-icon>description</mat-icon>
               Ver Reseña
             </button>
 
@@ -135,7 +120,6 @@
               mat-stroked-button
               color="accent"
               (click)="completarEncuesta(turno)">
-              <mat-icon>assignment</mat-icon>
               Completar Encuesta
             </button>
 
@@ -144,7 +128,6 @@
               mat-raised-button
               color="accent"
               (click)="calificarAtencion(turno)">
-              <mat-icon>star</mat-icon>
               Calificar Atención
             </button>
           </div>
@@ -154,7 +137,7 @@
   </div>
 
   <!-- Sin resultados de filtro -->
-  <mat-card *ngIf="!cargando && turnos.length > 0 && turnosFiltrados.length === 0" class="no-resultados">
+  <mat-card *ngIf="!cargando && turnos.length > 0 && (turnos | filtroTurnos:filtroTexto:opcionesFiltro).length === 0" class="no-resultados">
     <mat-icon>search_off</mat-icon>
     <p>No se encontraron turnos con el filtro aplicado</p>
     <button mat-raised-button color="primary" (click)="limpiarFiltros()">

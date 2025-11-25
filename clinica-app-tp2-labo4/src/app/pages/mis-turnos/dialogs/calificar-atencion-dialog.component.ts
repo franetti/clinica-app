@@ -25,8 +25,8 @@ interface TurnoConNombres extends TurnoDTO {
     MatIconModule
   ],
   template: `
+  <div style="margin:15px;">
     <h2 mat-dialog-title>
-      <mat-icon>star</mat-icon>
       Calificar Atención
     </h2>
     
@@ -39,10 +39,9 @@ interface TurnoConNombres extends TurnoDTO {
 
       <div class="calificacion-section">
         <h3>Calificación</h3>
-        <p class="instruccion">Haga clic en las estrellas para calificar (1-6)</p>
         <div class="estrellas">
           <mat-icon
-            *ngFor="let star of [1, 2, 3, 4, 5, 6]"
+            *ngFor="let star of [1, 2, 3, 4, 5]"
             [class.filled]="star <= calificacion"
             [class.hover]="star <= hoverStar"
             (click)="setCalificacion(star)"
@@ -65,14 +64,11 @@ interface TurnoConNombres extends TurnoDTO {
           placeholder="Cuéntenos sobre su experiencia con el especialista..."
           required>
         </textarea>
-        <mat-icon matPrefix>comment</mat-icon>
-        <mat-hint>Comparta su experiencia para ayudar a otros pacientes</mat-hint>
       </mat-form-field>
     </mat-dialog-content>
     
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancelar()">
-        <mat-icon>close</mat-icon>
         Cancelar
       </button>
       <button
@@ -80,10 +76,10 @@ interface TurnoConNombres extends TurnoDTO {
         color="primary"
         [disabled]="!calificacion || !resenia || resenia.trim().length < 15"
         (click)="onConfirmar()">
-        <mat-icon>send</mat-icon>
         Enviar Calificación
       </button>
     </mat-dialog-actions>
+    </div>
   `,
   styles: [`
     h2 {
@@ -186,7 +182,7 @@ export class CalificarAtencionDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<CalificarAtencionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { turno: TurnoConNombres }
-  ) {}
+  ) { }
 
   setCalificacion(star: number): void {
     this.calificacion = star;

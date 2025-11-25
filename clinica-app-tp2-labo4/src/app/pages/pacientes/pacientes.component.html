@@ -1,0 +1,75 @@
+<div class="pacientes-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        Mis Pacientes
+      </mat-card-title>
+      <mat-card-subtitle>
+        Pacientes que he atendido
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando pacientes...</p>
+  </div>
+
+  <!-- Sin pacientes -->
+  <mat-card *ngIf="!cargando && pacientes.length === 0" class="no-pacientes">
+    <p>No hay pacientes atendidos aún</p>
+    <p class="subtitle">Los pacientes aparecerán aquí después de que finalices sus turnos</p>
+  </mat-card>
+
+  <!-- Cards de pacientes -->
+  <div *ngIf="!cargando && pacientes.length > 0" class="pacientes-grid">
+    <mat-card *ngFor="let paciente of pacientes" class="paciente-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ paciente.nombre }} {{ paciente.apellido }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          DNI: {{ paciente.dni | dniFormato:'conPuntos' }} | Email: {{ paciente.email }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="paciente-info">
+          <div class="info-item" *ngIf="paciente.obraSocial">
+            <span><strong>Obra Social:</strong> {{ paciente.obraSocial }}</span>
+          </div>
+        </div>
+
+        <div class="ultimos-turnos-section">
+          <h4>
+            Últimos 3 Turnos
+          </h4>
+          <div *ngIf="paciente.ultimosTurnos && paciente.ultimosTurnos.length > 0" class="turnos-list">
+            <div *ngFor="let turno of paciente.ultimosTurnos" class="turno-item">
+              <div class="turno-fecha">
+                <span>{{ formatearFecha(turno.fecha) }}</span>
+              </div>
+              <div class="turno-info">
+                <span class="turno-especialidad">{{ turno.especialidad }}</span>
+                <span class="turno-estado" [class]="turno.estadoTurno | estadoTurno:'clase'">
+                  {{ turno.estadoTurno | estadoTurno }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!paciente.ultimosTurnos || paciente.ultimosTurnos.length === 0" class="sin-turnos">
+            <p>No hay turnos registrados</p>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="verHistoriaClinica(paciente)" matTooltip="Ver Historia Clínica">
+          Ver Historia Clínica
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>
+
