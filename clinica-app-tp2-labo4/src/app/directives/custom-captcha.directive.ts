@@ -37,7 +37,7 @@ export class CustomCaptchaDirective implements OnInit, OnDestroy {
                 // Siempre renderizar el template
                 this.viewContainerRef.createEmbeddedView(this.templateRef);
 
-                if (this.userRequiresCaptcha ) {
+                if (this.userRequiresCaptcha) {
                     this.createCaptchaContainer();
                 } else {
                     this.captchaResolved.emit('no-captcha-required');

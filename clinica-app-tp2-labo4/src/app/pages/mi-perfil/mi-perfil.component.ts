@@ -740,9 +740,9 @@ export class MiPerfilComponent implements OnInit {
       return;
     }
 
-    // Validar captcha si es requerido
+    // valida captcha si el usuario tiene en true
     if (this.recaptchaToken === null || this.recaptchaToken === 'no-captcha-required') {
-      // Si el token es null, significa que el captcha expiró o hubo error
+      // o hubo error o expiro
       if (this.recaptchaToken === null) {
         this.snackBar.open('Por favor complete el captcha de verificación', 'Cerrar', {
           duration: 3000,
@@ -752,7 +752,7 @@ export class MiPerfilComponent implements OnInit {
       }
     }
 
-    // Validar que el horario de fin sea mayor que el de inicio
+    // validar el horario fin e inicio
     if (this.horaFin <= this.horaInicio) {
       this.snackBar.open('La hora de fin debe ser posterior a la hora de inicio', 'Cerrar', {
         duration: 3000,
