@@ -1,8 +1,8 @@
 <div class="solicitar-turno-container">
-  <h2>Solicitar Turno</h2>
+ 
 
   <form [formGroup]="turnoForm" (ngSubmit)="onSubmit()" class="formulario">
-    
+     <h2 >Solicitar Turno</h2>
     <mat-form-field appearance="fill" *ngIf="esAdmin">
       <mat-label>Paciente</mat-label>
       <mat-select formControlName="paciente">
@@ -32,7 +32,7 @@
               [class.seleccionado]="turnoForm.get('especialidad')?.value === especialidad"
               (click)="seleccionarEspecialidad(especialidad)">
               <div class="imagen-circular">
-                <img [src]="getImagenEspecialidad(especialidad)" alt="{{ especialidad }}">
+                <img [src]="getImagenEspecialidad(especialidad)" alt="{{ especialidad }}"   (error)="ponerImagenFallback($event)">
               </div>
               <span class="nombre-item">{{ especialidad }}</span>
             </div>

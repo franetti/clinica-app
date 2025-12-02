@@ -119,24 +119,7 @@ export class AuthService {
                             panelClass: ['snack-exito']
                         });
 
-                        if (user) {
-                            switch (user.tipoUsuario) {
-                                case 'paciente':
-                                    this.router.navigate(['/mis-turnos']);
-                                    break;
-                                case 'especialista':
-                                    this.router.navigate(['/pacientes']);
-                                    break;
-                                case 'admin':
-                                    this.router.navigate(['/turnos']);
-                                    break;
-                                default:
-                                    this.router.navigate(['/home']);
-                                    break;
-                            }
-                        } else {
-                            this.router.navigate(['/home']);
-                        }
+                        this.router.navigate(['/onboarding']);
                     }
                 }
             });

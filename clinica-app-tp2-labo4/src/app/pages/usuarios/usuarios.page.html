@@ -1,148 +1,150 @@
-<div style="display: flex; justify-content: space-between; align-items: center; margin:20px 30px; ">
-    <h2 style="font-size: 32px;margin:0;" >Gestion de usuarios</h2>
-    <div style="display: flex; gap: 10px;">
-        <button mat-raised-button color="accent" (click)="descargarExcel()" style="background-color: #2196F3; color: white;">
-            Descargar Excel
-        </button>
-        <button mat-raised-button color="primary" style="background-color: #4caf50; color: white;">
-            <a  routerLink="/register" style="text-decoration: none; color: #fff;">Nuevo Usuario</a>
-        </button>
-    </div>
+<div style="background-color: white; height: 100%; padding:20px; box-sizing: border-box;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin:20px 30px; ">
+      <h2 style="font-size: 32px;margin:0;" >Gestion de usuarios</h2>
+      <div style="display: flex; gap: 10px;">
+          <button mat-raised-button color="accent" (click)="descargarExcel()" style="background-color: #2196F3; color: white;">
+              Descargar Excel
+          </button>
+          <button mat-raised-button color="primary" style="background-color: #4caf50; color: white;">
+              <a  routerLink="/register" style="text-decoration: none; color: #fff;">Nuevo Usuario</a>
+          </button>
+      </div>
+  </div>
+
+  <mat-tab-group style="background-color: white;">
+    <mat-tab label="Pacientes">
+      <div class="usuarios-container">
+        <div *ngIf="pacientes.length === 0" class="no-usuarios">
+          <p>No hay pacientes registrados</p>
+        </div>
+        
+        <div *ngIf="pacientes.length > 0" class="usuarios-grid">
+          <mat-card *ngFor="let paciente of pacientes" class="usuario-card">
+            <mat-card-header>
+              <mat-card-title>{{ paciente.nombre }} {{ paciente.apellido }}</mat-card-title>
+              <mat-card-subtitle>{{ paciente.tipoUsuario }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="usuario-info">
+                <div class="info-item">
+                  <span class="info-label">Email:</span>
+                  <span class="info-value">{{ paciente.email }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">DNI:</span>
+                  <span class="info-value">{{ paciente.dni | dniFormato:'conPuntos' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Edad:</span>
+                  <span class="info-value">{{ paciente.edad }} años</span>
+                </div>
+                <div class="info-item" *ngIf="paciente.obraSocial">
+                  <span class="info-label">Obra Social:</span>
+                  <span class="info-value">{{ paciente.obraSocial }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Fecha Creación:</span>
+                  <span class="info-value">{{ paciente.fechaCreacion | date:'short' }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+            
+            <mat-card-actions>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="verHistoriaClinica(paciente)" 
+                matTooltip="Ver Historia Clínica">
+                Ver Historia Clínica
+              </button>
+              <button 
+                mat-raised-button 
+                color="accent" 
+                (click)="descargarInfoUsuario(paciente)"
+                [disabled]="descargandoUsuario === paciente.id"
+                matTooltip="Descargar información del usuario y sus turnos">
+                <span *ngIf="descargandoUsuario !== paciente.id">Descargar Info</span>
+                <span *ngIf="descargandoUsuario === paciente.id" style="display: flex; align-items: center; gap: 8px;">
+                  <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
+                  Descargando...
+                </span>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Especialistas">
+      <div class="usuarios-container">
+        <div *ngIf="especialistas.length === 0" class="no-usuarios">
+          <p>No hay especialistas registrados</p>
+        </div>
+        
+        <div *ngIf="especialistas.length > 0" class="usuarios-grid">
+          <mat-card *ngFor="let especialista of especialistas" class="usuario-card">
+            <mat-card-header>
+              <mat-card-title>{{ especialista.nombre }} {{ especialista.apellido }}</mat-card-title>
+              <mat-card-subtitle>{{ especialista.tipoUsuario }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="usuario-info">
+                <div class="info-item">
+                  <span class="info-label">Email:</span>
+                  <span class="info-value">{{ especialista.email }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">DNI:</span>
+                  <span class="info-value">{{ especialista.dni | dniFormato:'conPuntos' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Edad:</span>
+                  <span class="info-value">{{ especialista.edad }} años</span>
+                </div>
+                <div class="info-item" *ngIf="especialista.especialidad">
+                  <span class="info-label">Especialidad:</span>
+                  <span class="info-value">{{ especialista.especialidad }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Fecha Creación:</span>
+                  <span class="info-value">{{ especialista.fechaCreacion | date:'short' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Estado:</span>
+                  <mat-chip 
+                    [appHighlight]="especialista.habilitado" 
+                    [highlightCondition]="'enabled'">
+                    {{ especialista.habilitado ? 'Habilitado' : 'No Habilitado' }}
+                  </mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+            
+            <mat-card-actions>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="toggleHabilitado(especialista)">
+                {{ especialista.habilitado ? 'Deshabilitar' : 'Habilitar' }}
+              </button>
+              <button 
+                mat-raised-button 
+                color="accent" 
+                (click)="descargarInfoUsuario(especialista)"
+                [disabled]="descargandoUsuario === especialista.id"
+                matTooltip="Descargar información del usuario y sus turnos">
+                <span *ngIf="descargandoUsuario !== especialista.id">Descargar Info</span>
+                <span *ngIf="descargandoUsuario === especialista.id" style="display: flex; align-items: center; gap: 8px;">
+                  <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
+                  Descargando...
+                </span>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </div>
-
-<mat-tab-group style="background-color: white;">
-  <mat-tab label="Pacientes">
-    <div class="usuarios-container">
-      <div *ngIf="pacientes.length === 0" class="no-usuarios">
-        <p>No hay pacientes registrados</p>
-      </div>
-      
-      <div *ngIf="pacientes.length > 0" class="usuarios-grid">
-        <mat-card *ngFor="let paciente of pacientes" class="usuario-card">
-          <mat-card-header>
-            <mat-card-title>{{ paciente.nombre }} {{ paciente.apellido }}</mat-card-title>
-            <mat-card-subtitle>{{ paciente.tipoUsuario }}</mat-card-subtitle>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="usuario-info">
-              <div class="info-item">
-                <span class="info-label">Email:</span>
-                <span class="info-value">{{ paciente.email }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">DNI:</span>
-                <span class="info-value">{{ paciente.dni | dniFormato:'conPuntos' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Edad:</span>
-                <span class="info-value">{{ paciente.edad }} años</span>
-              </div>
-              <div class="info-item" *ngIf="paciente.obraSocial">
-                <span class="info-label">Obra Social:</span>
-                <span class="info-value">{{ paciente.obraSocial }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Fecha Creación:</span>
-                <span class="info-value">{{ paciente.fechaCreacion | date:'short' }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-          
-          <mat-card-actions>
-            <button 
-              mat-raised-button 
-              color="primary" 
-              (click)="verHistoriaClinica(paciente)" 
-              matTooltip="Ver Historia Clínica">
-              Ver Historia Clínica
-            </button>
-            <button 
-              mat-raised-button 
-              color="accent" 
-              (click)="descargarInfoUsuario(paciente)"
-              [disabled]="descargandoUsuario === paciente.id"
-              matTooltip="Descargar información del usuario y sus turnos">
-              <span *ngIf="descargandoUsuario !== paciente.id">Descargar Info</span>
-              <span *ngIf="descargandoUsuario === paciente.id" style="display: flex; align-items: center; gap: 8px;">
-                <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
-                Descargando...
-              </span>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-    </div>
-  </mat-tab>
-
-  <mat-tab label="Especialistas">
-    <div class="usuarios-container">
-      <div *ngIf="especialistas.length === 0" class="no-usuarios">
-        <p>No hay especialistas registrados</p>
-      </div>
-      
-      <div *ngIf="especialistas.length > 0" class="usuarios-grid">
-        <mat-card *ngFor="let especialista of especialistas" class="usuario-card">
-          <mat-card-header>
-            <mat-card-title>{{ especialista.nombre }} {{ especialista.apellido }}</mat-card-title>
-            <mat-card-subtitle>{{ especialista.tipoUsuario }}</mat-card-subtitle>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="usuario-info">
-              <div class="info-item">
-                <span class="info-label">Email:</span>
-                <span class="info-value">{{ especialista.email }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">DNI:</span>
-                <span class="info-value">{{ especialista.dni | dniFormato:'conPuntos' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Edad:</span>
-                <span class="info-value">{{ especialista.edad }} años</span>
-              </div>
-              <div class="info-item" *ngIf="especialista.especialidad">
-                <span class="info-label">Especialidad:</span>
-                <span class="info-value">{{ especialista.especialidad }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Fecha Creación:</span>
-                <span class="info-value">{{ especialista.fechaCreacion | date:'short' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Estado:</span>
-                <mat-chip 
-                  [appHighlight]="especialista.habilitado" 
-                  [highlightCondition]="'enabled'">
-                  {{ especialista.habilitado ? 'Habilitado' : 'No Habilitado' }}
-                </mat-chip>
-              </div>
-            </div>
-          </mat-card-content>
-          
-          <mat-card-actions>
-            <button 
-              mat-raised-button 
-              color="primary" 
-              (click)="toggleHabilitado(especialista)">
-              {{ especialista.habilitado ? 'Deshabilitar' : 'Habilitar' }}
-            </button>
-            <button 
-              mat-raised-button 
-              color="accent" 
-              (click)="descargarInfoUsuario(especialista)"
-              [disabled]="descargandoUsuario === especialista.id"
-              matTooltip="Descargar información del usuario y sus turnos">
-              <span *ngIf="descargandoUsuario !== especialista.id">Descargar Info</span>
-              <span *ngIf="descargandoUsuario === especialista.id" style="display: flex; align-items: center; gap: 8px;">
-                <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
-                Descargando...
-              </span>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-    </div>
-  </mat-tab>
-</mat-tab-group>
