@@ -17,6 +17,7 @@ export interface HistoriaClinicaDTO {
 export interface DatoDinamico {
     clave: string;
     valor: string;
+    tipo?: 'rango' | 'numero' | 'switch' | 'texto'; // Tipo de campo especial
 }
 
 @Injectable({
@@ -110,7 +111,26 @@ export class HistoriaClinicaService {
     parsearDatosDinamicos(dinamicos: string): DatoDinamico[] {
         try {
             if (!dinamicos) return [];
-            return JSON.parse(dinamicos);
+            const datos = JSON.parse(dinamicos);
+
+            // Procesar cada dato - convertir valores de switch
+            return datos.map((dato: DatoDinamico) => {
+                const valor = dato.valor || '';
+
+                // Si el valor es "si" o "no", formatearlo para mostrar
+                if (valor === 'si' || valor === 'no') {
+                    return {
+                        ...dato,
+                        tipo: 'switch',
+                        valor: valor === 'si' ? 'Sí' : 'No'
+                    };
+                }
+
+                return {
+                    ...dato,
+                    tipo: 'texto'
+                };
+            });
         } catch (error) {
             console.error('Error al parsear datos dinámicos:', error);
             return [];

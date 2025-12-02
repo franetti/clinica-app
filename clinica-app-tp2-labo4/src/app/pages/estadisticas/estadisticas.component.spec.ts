@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { EstadisticasComponent } from './estadisticas.component';
 
 describe('EstadisticasComponent', () => {

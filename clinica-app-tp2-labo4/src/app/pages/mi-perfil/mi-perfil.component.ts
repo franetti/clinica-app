@@ -26,6 +26,7 @@ import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 import { EstadoTurnoPipe } from '../../pipes/estado-turno.pipe';
 import { HoverZoomDirective } from '../../directives/hover-zoom.directive';
 import { HighlightDirective } from '../../directives/highlight.directive';
+import { CustomCaptchaDirective } from '../../directives/custom-captcha.directive';
 import jsPDF from 'jspdf';
 
 @Component({
@@ -51,7 +52,8 @@ import jsPDF from 'jspdf';
     HistoriaClinicaFormatoPipe,
     DniFormatoPipe,
     HoverZoomDirective,
-    HighlightDirective
+    HighlightDirective,
+    CustomCaptchaDirective
   ],
   templateUrl: './mi-perfil.component.html',
   styleUrls: ['./mi-perfil.component.scss']
@@ -66,6 +68,9 @@ export class MiPerfilComponent implements OnInit {
   horaFin: number = 18;
   horariosExistentes: HorarioDTO[] = [];
   cargando = false;
+
+  // Captcha
+  recaptchaToken: string | null = null;
 
   diasSemana = [
     { numero: 1, nombre: 'Lunes', corto: 'L' },
@@ -722,6 +727,10 @@ export class MiPerfilComponent implements OnInit {
     return this.diasSeleccionados.length === this.diasSemana.length;
   }
 
+  onCaptchaResolved(token: string | null): void {
+    this.recaptchaToken = token;
+  }
+
   async guardarHorarios(): Promise<void> {
     if (!this.especialidadSeleccionada || this.diasSeleccionados.length === 0) {
       this.snackBar.open('Debe seleccionar especialidad y al menos un día', 'Cerrar', {
@@ -729,6 +738,18 @@ export class MiPerfilComponent implements OnInit {
         panelClass: ['snack-error']
       });
       return;
+    }
+
+    // Validar captcha si es requerido
+    if (this.recaptchaToken === null || this.recaptchaToken === 'no-captcha-required') {
+      // Si el token es null, significa que el captcha expiró o hubo error
+      if (this.recaptchaToken === null) {
+        this.snackBar.open('Por favor complete el captcha de verificación', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['snack-error']
+        });
+        return;
+      }
     }
 
     // Validar que el horario de fin sea mayor que el de inicio
@@ -784,6 +805,7 @@ export class MiPerfilComponent implements OnInit {
 
       // Recargar horarios
       await this.cargarHorariosEspecialista();
+      this.recaptchaToken = null;
 
     } catch (error) {
       console.error('Error al guardar horarios:', error);

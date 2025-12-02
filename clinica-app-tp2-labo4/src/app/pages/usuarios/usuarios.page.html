@@ -47,6 +47,14 @@
                   <span class="info-label">Fecha Creación:</span>
                   <span class="info-value">{{ paciente.fechaCreacion | date:'short' }}</span>
                 </div>
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                  <span class="info-label">Captcha:</span>
+                  <mat-slide-toggle 
+                    [checked]="paciente.captcha || false"
+                    (change)="toggleCaptcha(paciente)"
+                    color="primary">
+                  </mat-slide-toggle>
+                </div>
               </div>
             </mat-card-content>
             
@@ -118,6 +126,14 @@
                     [highlightCondition]="'enabled'">
                     {{ especialista.habilitado ? 'Habilitado' : 'No Habilitado' }}
                   </mat-chip>
+                </div>
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                  <span class="info-label">Captcha:</span>
+                  <mat-slide-toggle 
+                    [checked]="especialista.captcha || false"
+                    (change)="toggleCaptcha(especialista)"
+                    color="primary">
+                  </mat-slide-toggle>
                 </div>
               </div>
             </mat-card-content>

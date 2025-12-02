@@ -47,95 +47,119 @@
     </mat-card-content>
   </mat-card>
 
-  <div *ngIf="!cargando" class="reportes-grid">
-    <mat-card class="reporte-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>login</mat-icon>
-          Log de Ingresos al Sistema
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Descargue el registro completo de ingresos al sistema con usuario, día y horario.</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="descargarExcelLogs()" [disabled]="logs.length === 0">
-          <mat-icon>download</mat-icon>
-          Descargar Excel
-        </button>
-      </mat-card-actions>
-    </mat-card>
+  <div *ngIf="!cargando" class="reportes-container">
+    <!-- Primera fila: 3 columnas - Gráficos de torta -->
+    <div class="reportes-row reportes-row-pie">
+      <mat-card class="reporte-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>medical_services</mat-icon>
+            Turnos por Especialidad
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Descargue el reporte de turnos agrupados por especialidad con fechas y detalles.</p>
+          <div class="chart-container" *ngIf="!cargando && turnos.length > 0">
+            <canvas #especialidadChart></canvas>
+          </div>
+          <p *ngIf="!cargando && turnos.length === 0" class="no-data-message">
+            No hay turnos para mostrar
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="descargarExcelTurnosEspecialidad()" [disabled]="turnos.length === 0">
+            <mat-icon>download</mat-icon>
+            Descargar Excel 
+          </button>
+        </mat-card-actions>
+      </mat-card>
 
-    <mat-card class="reporte-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>medical_services</mat-icon>
-          Turnos por Especialidad
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Descargue el reporte de turnos agrupados por especialidad con fechas y detalles.</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="descargarExcelTurnosEspecialidad()" [disabled]="turnos.length === 0">
-          <mat-icon>download</mat-icon>
-          Descargar Excel
-        </button>
-      </mat-card-actions>
-    </mat-card>
+      <mat-card class="reporte-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>person</mat-icon>
+            Turnos Solicitados por Médico
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Descargue el reporte de turnos solicitados por cada médico en el rango de fechas seleccionado.</p>
+          <div class="chart-container" *ngIf="!cargando && turnos.length > 0">
+            <canvas #turnosSolicitadosChart></canvas>
+          </div>
+          <p *ngIf="!cargando && turnos.length === 0" class="no-data-message">
+            No hay turnos para mostrar
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="descargarExcelTurnosSolicitados()" [disabled]="turnos.length === 0">
+            <mat-icon>download</mat-icon>
+            Descargar Excel
+          </button>
+        </mat-card-actions>
+      </mat-card>
 
-    <mat-card class="reporte-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>calendar_today</mat-icon>
-          Turnos por Día
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Descargue el reporte de turnos agrupados por día con fechas y detalles.</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="descargarExcelTurnosDia()" [disabled]="turnos.length === 0">
-          <mat-icon>download</mat-icon>
-          Descargar Excel
-        </button>
-      </mat-card-actions>
-    </mat-card>
+      <mat-card class="reporte-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>check_circle</mat-icon>
+            Turnos Finalizados por Médico
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Descargue el reporte de turnos finalizados por cada médico en el rango de fechas seleccionado.</p>
+          <div class="chart-container" *ngIf="!cargando && turnos.length > 0">
+            <canvas #turnosFinalizadosChart></canvas>
+          </div>
+          <p *ngIf="!cargando && turnos.length === 0" class="no-data-message">
+            No hay turnos para mostrar
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="descargarExcelTurnosFinalizados()" [disabled]="turnos.length === 0">
+            <mat-icon>download</mat-icon>
+            Descargar Excel
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
 
-    <mat-card class="reporte-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>person</mat-icon>
-          Turnos Solicitados por Médico
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Descargue el reporte de turnos solicitados por cada médico en el rango de fechas seleccionado.</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="descargarExcelTurnosSolicitados()" [disabled]="turnos.length === 0">
-          <mat-icon>download</mat-icon>
-          Descargar Excel
-        </button>
-      </mat-card-actions>
-    </mat-card>
+    <!-- Segunda fila: 2 columnas - Gráficos de bar solo en Excel -->
+    <div class="reportes-row reportes-row-bar">
+      <mat-card class="reporte-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>login</mat-icon>
+            Log de Ingresos al Sistema
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Descargue el registro completo de ingresos al sistema con usuario, día y horario.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="descargarExcelLogs()" [disabled]="logs.length === 0">
+            <mat-icon>download</mat-icon>
+            Descargar Excel
+          </button>
+        </mat-card-actions>
+      </mat-card>
 
-    <mat-card class="reporte-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>check_circle</mat-icon>
-          Turnos Finalizados por Médico
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Descargue el reporte de turnos finalizados por cada médico en el rango de fechas seleccionado.</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="descargarExcelTurnosFinalizados()" [disabled]="turnos.length === 0">
-          <mat-icon>download</mat-icon>
-          Descargar Excel
-        </button>
-      </mat-card-actions>
-    </mat-card>
+      <mat-card class="reporte-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>calendar_today</mat-icon>
+            Turnos por Día
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Descargue el reporte de turnos agrupados por día con fechas y detalles.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" (click)="descargarExcelTurnosDia()" [disabled]="turnos.length === 0">
+            <mat-icon>download</mat-icon>
+            Descargar Excel
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
   </div>
 </div>

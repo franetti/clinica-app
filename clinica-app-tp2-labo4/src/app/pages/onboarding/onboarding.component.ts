@@ -12,10 +12,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioDTO } from '../../models/usuario';
 
+
 @Component({
   selector: 'app-onboarding',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     MatFormFieldModule,

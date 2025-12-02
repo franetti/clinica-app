@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { HistoriaClinicaService, HistoriaClinicaDTO, DatoDinamico } from '../../services/historia-clinica.service';
@@ -23,7 +24,7 @@ import { HighlightDirective } from '../../directives/highlight.directive';
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatTableModule, MatButtonModule, MatIcon, RouterLink, MatDialogModule, MatCardModule, MatTooltipModule, MatChipsModule, MatProgressSpinnerModule, DniFormatoPipe, HistoriaClinicaFormatoPipe, HighlightDirective],
+  imports: [CommonModule, MatTabsModule, MatTableModule, MatButtonModule, MatIcon, RouterLink, MatDialogModule, MatCardModule, MatTooltipModule, MatChipsModule, MatProgressSpinnerModule, MatSlideToggleModule, DniFormatoPipe, HistoriaClinicaFormatoPipe, HighlightDirective],
   templateUrl: './usuarios.page.html',
   styleUrls: ['./usuarios.page.scss']
 })
@@ -64,6 +65,17 @@ export class UsuariosPage implements OnInit {
     this.usuariosService.toggleHabilitado(usuario).subscribe(updated => {
       if (updated != null) {
         usuario.habilitado = updated.habilitado;
+      }
+      this.loadPacientes();
+      this.loadEspecialistas();
+    });
+  }
+
+  toggleCaptcha(usuario: UsuarioDTO) {
+    const nuevoValor = !usuario.captcha;
+    this.usuariosService.updateCaptcha(usuario.id!, nuevoValor).subscribe(updated => {
+      if (updated != null) {
+        usuario.captcha = updated.captcha;
       }
       this.loadPacientes();
       this.loadEspecialistas();

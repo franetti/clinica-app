@@ -77,6 +77,15 @@ export class UsuariosService {
     ).pipe(map(res => (res.data && res.data[0]) || null));
   }
 
+  // Actualizar campo captcha
+  updateCaptcha(id: string, captcha: boolean): Observable<UsuarioDTO | null> {
+    return from(this.supabaseService.getClient()
+      .from(this.table)
+      .update({ captcha: captcha })
+      .eq('id', id)
+    ).pipe(map(res => (res.data && res.data[0]) || null));
+  }
+
   // Verificar si un email ya existe
   verificarEmailExiste(email: string): Observable<boolean> {
     return from(this.supabaseService.getClient()

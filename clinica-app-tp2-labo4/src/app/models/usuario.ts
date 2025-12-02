@@ -9,8 +9,9 @@ export type UsuarioDTO = {
   tipoUsuario: 'paciente' | 'especialista' | 'admin';
   imagen: File | string;
   imagen2?: File | string;
-  obraSocial?: string;  
-  especialidad?: string;  
+  obraSocial?: string;
+  especialidad?: string;
   habilitado?: boolean;
   fechaCreacion?: Date;
+  captcha?: boolean;
 }

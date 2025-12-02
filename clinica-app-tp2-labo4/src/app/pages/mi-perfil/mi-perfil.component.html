@@ -170,6 +170,10 @@
               </div>
             </div>
 
+            <ng-template appCustomCaptcha 
+                         (captchaResolved)="onCaptchaResolved($event)">
+            </ng-template>
+
             <div class="acciones-horarios">
               <p *ngIf="diasSeleccionados.length > 0" class="seleccionados-count">
                 {{ diasSeleccionados.length }} día(s) seleccionado(s)

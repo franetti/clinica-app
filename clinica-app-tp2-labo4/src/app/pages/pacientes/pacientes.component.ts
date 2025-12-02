@@ -19,148 +19,148 @@ import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 import { EstadoTurnoPipe } from '../../pipes/estado-turno.pipe';
 
 interface PacienteConTurnos extends UsuarioDTO {
-    ultimosTurnos?: TurnoDTO[];
+  ultimosTurnos?: TurnoDTO[];
 }
 
 @Component({
-    selector: 'app-pacientes',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTableModule,
-        MatDialogModule,
-        MatSnackBarModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        HistoriaClinicaFormatoPipe,
-        DniFormatoPipe,
-        EstadoTurnoPipe
-    ],
-    templateUrl: './pacientes.component.html',
-    styleUrls: ['./pacientes.component.scss']
+  selector: 'app-pacientes',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    HistoriaClinicaFormatoPipe,
+    DniFormatoPipe,
+    EstadoTurnoPipe
+  ],
+  templateUrl: './pacientes.component.html',
+  styleUrls: ['./pacientes.component.scss']
 })
 export class PacientesComponent implements OnInit {
-    pacientes: PacienteConTurnos[] = [];
-    cargando = false;
-    usuarioActual: UsuarioDTO | null = null;
+  pacientes: PacienteConTurnos[] = [];
+  cargando = false;
+  usuarioActual: UsuarioDTO | null = null;
 
-    constructor(
-        private authService: AuthService,
-        private usuariosService: UsuariosService,
-        private historiaClinicaService: HistoriaClinicaService,
-        private turnosService: TurnosService,
-        private dialog: MatDialog,
-        private snackBar: MatSnackBar
-    ) { }
+  constructor(
+    private authService: AuthService,
+    private usuariosService: UsuariosService,
+    private historiaClinicaService: HistoriaClinicaService,
+    private turnosService: TurnosService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) { }
 
-    async ngOnInit() {
-        this.authService.getUser().subscribe(async user => {
-            this.usuarioActual = user;
-            if (user?.id && user?.tipoUsuario === 'especialista') {
-                await this.cargarPacientes(user.id);
+  async ngOnInit() {
+    this.authService.getUser().subscribe(async user => {
+      this.usuarioActual = user;
+      if (user?.id && user?.tipoUsuario === 'especialista') {
+        await this.cargarPacientes(user.id);
+      }
+    });
+  }
+
+  async cargarPacientes(idEspecialista: string) {
+    this.cargando = true;
+    try {
+      // Obtener IDs de pacientes atendidos por este especialista
+      const idsPacientes = await this.historiaClinicaService.obtenerPacientesAtendidosPorEspecialista(idEspecialista);
+
+      if (idsPacientes.length === 0) {
+        this.pacientes = [];
+        this.cargando = false;
+        return;
+      }
+
+      // Obtener todos los pacientes
+      const todosLosPacientes = await this.usuariosService.getPacientes().toPromise();
+
+      // Filtrar solo los pacientes atendidos
+      const pacientesFiltrados = (todosLosPacientes || []).filter(p =>
+        p.id && idsPacientes.includes(p.id)
+      );
+
+      // Cargar los últimos 3 turnos de cada paciente
+      this.pacientes = await Promise.all(
+        pacientesFiltrados.map(async (paciente) => {
+          const pacienteConTurnos: PacienteConTurnos = { ...paciente };
+          if (paciente.id) {
+            try {
+              const turnos = await this.turnosService.obtenerTurnosPaciente(paciente.id);
+              // Filtrar solo los turnos con este especialista y ordenar por fecha descendente
+              const turnosConEspecialista = turnos
+                .filter(t => t.especialista === idEspecialista)
+                .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+                .slice(0, 3); // Últimos 3 turnos
+              pacienteConTurnos.ultimosTurnos = turnosConEspecialista;
+            } catch (error) {
+              console.error(`Error al cargar turnos del paciente ${paciente.id}:`, error);
+              pacienteConTurnos.ultimosTurnos = [];
             }
-        });
+          }
+          return pacienteConTurnos;
+        })
+      );
+    } catch (error) {
+      console.error('Error al cargar pacientes:', error);
+      this.snackBar.open('Error al cargar los pacientes', 'Cerrar', {
+        duration: 3000
+      });
+    } finally {
+      this.cargando = false;
     }
+  }
 
-    async cargarPacientes(idEspecialista: string) {
-        this.cargando = true;
-        try {
-            // Obtener IDs de pacientes atendidos por este especialista
-            const idsPacientes = await this.historiaClinicaService.obtenerPacientesAtendidosPorEspecialista(idEspecialista);
+  formatearFecha(fechaStr: string): string {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
 
-            if (idsPacientes.length === 0) {
-                this.pacientes = [];
-                this.cargando = false;
-                return;
-            }
+  getEstadoTexto(estado?: string): string {
+    switch (estado) {
+      case 'pendiente': return 'Pendiente';
+      case 'aceptado': return 'Aceptado';
+      case 'realizado': return 'Realizado';
+      case 'cancelado': return 'Cancelado';
+      case 'rechazado': return 'Rechazado';
+      default: return 'Desconocido';
+    }
+  }
 
-            // Obtener todos los pacientes
-            const todosLosPacientes = await this.usuariosService.getPacientes().toPromise();
+  verHistoriaClinica(usuario: UsuarioDTO) {
+    if (!usuario.id || !this.usuarioActual?.id) return;
 
-            // Filtrar solo los pacientes atendidos
-            const pacientesFiltrados = (todosLosPacientes || []).filter(p =>
-                p.id && idsPacientes.includes(p.id)
-            );
+    this.historiaClinicaService.obtenerHistoriaClinicaPorEspecialista(this.usuarioActual.id).then(historias => {
+      // Filtrar solo las historias de este paciente
+      const historiasPaciente = historias.filter(h => h.idPaciente === usuario.id);
 
-            // Cargar los últimos 3 turnos de cada paciente
-            this.pacientes = await Promise.all(
-                pacientesFiltrados.map(async (paciente) => {
-                    const pacienteConTurnos: PacienteConTurnos = { ...paciente };
-                    if (paciente.id) {
-                        try {
-                            const turnos = await this.turnosService.obtenerTurnosPaciente(paciente.id);
-                            // Filtrar solo los turnos con este especialista y ordenar por fecha descendente
-                            const turnosConEspecialista = turnos
-                                .filter(t => t.especialista === idEspecialista)
-                                .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-                                .slice(0, 3); // Últimos 3 turnos
-                            pacienteConTurnos.ultimosTurnos = turnosConEspecialista;
-                        } catch (error) {
-                            console.error(`Error al cargar turnos del paciente ${paciente.id}:`, error);
-                            pacienteConTurnos.ultimosTurnos = [];
-                        }
-                    }
-                    return pacienteConTurnos;
-                })
-            );
-        } catch (error) {
-            console.error('Error al cargar pacientes:', error);
-            this.snackBar.open('Error al cargar los pacientes', 'Cerrar', {
-                duration: 3000
-            });
-        } finally {
-            this.cargando = false;
+      this.dialog.open(HistoriaClinicaDialogComponent, {
+        width: '800px',
+        maxHeight: '90vh',
+        data: {
+          usuario: usuario,
+          historias: historiasPaciente
         }
-    }
-
-    formatearFecha(fechaStr: string): string {
-        const fecha = new Date(fechaStr);
-        return fecha.toLocaleDateString('es-AR', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    getEstadoTexto(estado?: string): string {
-        switch (estado) {
-            case 'pendiente': return 'Pendiente';
-            case 'aceptado': return 'Aceptado';
-            case 'realizado': return 'Realizado';
-            case 'cancelado': return 'Cancelado';
-            case 'rechazado': return 'Rechazado';
-            default: return 'Desconocido';
-        }
-    }
-
-    verHistoriaClinica(usuario: UsuarioDTO) {
-        if (!usuario.id || !this.usuarioActual?.id) return;
-
-        this.historiaClinicaService.obtenerHistoriaClinicaPorEspecialista(this.usuarioActual.id).then(historias => {
-            // Filtrar solo las historias de este paciente
-            const historiasPaciente = historias.filter(h => h.idPaciente === usuario.id);
-
-            this.dialog.open(HistoriaClinicaDialogComponent, {
-                width: '800px',
-                maxHeight: '90vh',
-                data: {
-                    usuario: usuario,
-                    historias: historiasPaciente
-                }
-            });
-        }).catch(error => {
-            console.error('Error al cargar historia clínica:', error);
-            this.snackBar.open('Error al cargar la historia clínica', 'Cerrar', {
-                duration: 3000
-            });
-        });
-    }
+      });
+    }).catch(error => {
+      console.error('Error al cargar historia clínica:', error);
+      this.snackBar.open('Error al cargar la historia clínica', 'Cerrar', {
+        duration: 3000
+      });
+    });
+  }
 }
 
 // Componente de diálogo para mostrar historia clínica
@@ -168,10 +168,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 
 @Component({
-    selector: 'app-historia-clinica-dialog-pacientes',
-    standalone: true,
-    imports: [CommonModule, MatDialogModule, MatCardModule, MatButtonModule, MatIconModule, HistoriaClinicaFormatoPipe],
-    template: `
+  selector: 'app-historia-clinica-dialog-pacientes',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatCardModule, MatButtonModule, MatIconModule, HistoriaClinicaFormatoPipe],
+  template: `
     <h2 mat-dialog-title>
       <mat-icon>medical_services</mat-icon>
       Historia Clínica - {{ data.usuario.nombre }} {{ data.usuario.apellido }}
@@ -240,7 +240,7 @@ import { Inject } from '@angular/core';
       <button mat-button (click)="cerrar()">Cerrar</button>
     </mat-dialog-actions>
   `,
-    styles: [`
+  styles: [`
     h2 {
       display: flex;
       align-items: center;
@@ -309,30 +309,30 @@ import { Inject } from '@angular/core';
   `]
 })
 class HistoriaClinicaDialogComponent {
-    constructor(
-        public dialogRef: MatDialogRef<HistoriaClinicaDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { usuario: UsuarioDTO, historias: HistoriaClinicaDTO[] },
-        private historiaClinicaService: HistoriaClinicaService
-    ) { }
+  constructor(
+    public dialogRef: MatDialogRef<HistoriaClinicaDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { usuario: UsuarioDTO, historias: HistoriaClinicaDTO[] },
+    private historiaClinicaService: HistoriaClinicaService
+  ) { }
 
-    parsearDatosDinamicos(dinamicos: string): DatoDinamico[] {
-        return this.historiaClinicaService.parsearDatosDinamicos(dinamicos);
-    }
+  parsearDatosDinamicos(dinamicos: string): DatoDinamico[] {
+    return this.historiaClinicaService.parsearDatosDinamicos(dinamicos);
+  }
 
-    formatearFecha(fecha: Date | string | undefined): string {
-        if (!fecha) return '';
-        const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-        return fechaObj.toLocaleDateString('es-AR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
+  formatearFecha(fecha: Date | string | undefined): string {
+    if (!fecha) return '';
+    const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    return fechaObj.toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
 
-    cerrar() {
-        this.dialogRef.close();
-    }
+  cerrar() {
+    this.dialogRef.close();
+  }
 }
 

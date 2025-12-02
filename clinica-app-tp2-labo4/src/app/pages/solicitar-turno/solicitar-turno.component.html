@@ -157,6 +157,10 @@
       }    
     </div>
 
+    <ng-template appCustomCaptcha 
+                 (captchaResolved)="onCaptchaResolved($event)">
+    </ng-template>
+
     <div class="acciones">
       <button 
         mat-raised-button 

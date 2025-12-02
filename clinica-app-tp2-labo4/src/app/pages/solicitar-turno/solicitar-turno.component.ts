@@ -19,6 +19,7 @@ import { UsuarioDTO } from '../../models/usuario';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { CustomCaptchaDirective } from '../../directives/custom-captcha.directive';
 
 interface HorarioDisponible {
   fecha: string;
@@ -41,7 +42,8 @@ interface HorarioDisponible {
     MatProgressSpinnerModule,
     MatAutocompleteModule,
     MatIconModule,
-    DniFormatoPipe
+    DniFormatoPipe,
+    CustomCaptchaDirective
   ],
   templateUrl: './solicitar-turno.component.html',
   styleUrls: ['./solicitar-turno.component.scss']
@@ -72,6 +74,9 @@ export class SolicitarTurnoComponent implements OnInit {
   cargando = false;
   cargandoHorarios = false;
   cargandoDias = false;
+
+  // Captcha
+  recaptchaToken: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -423,10 +428,23 @@ export class SolicitarTurnoComponent implements OnInit {
     return `${año}-${mes}-${dia}T${horas}:${minutos}:${segundos}`;
   }
 
+  onCaptchaResolved(token: string | null): void {
+    this.recaptchaToken = token;
+  }
+
   async onSubmit() {
     if (this.turnoForm.invalid) {
       this.snackBar.open('Por favor complete todos los campos', 'Cerrar', { duration: 3000 });
       return;
+    }
+
+    // Validar captcha si es requerido
+    if (this.recaptchaToken === null || this.recaptchaToken === 'no-captcha-required') {
+      // Si el token es null, significa que el captcha expiró o hubo error
+      if (this.recaptchaToken === null) {
+        this.snackBar.open('Por favor complete el captcha de verificación', 'Cerrar', { duration: 3000 });
+        return;
+      }
     }
 
     this.cargando = true;
@@ -503,6 +521,7 @@ export class SolicitarTurnoComponent implements OnInit {
       this.turnoForm.reset();
       this.diasDisponibles = [];
       this.horariosDisponibles = [];
+      this.recaptchaToken = null;
 
       // Redirigir según el tipo de usuario
       if (this.esAdmin) {
